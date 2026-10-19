@@ -11,9 +11,9 @@ import java.io.File
 
 /**
  * Valida desde los CSV reales las 25 atenciones del corte e informa el dictamen de
- * cada una. Las reglas no se ajustan para que pasen: el dictamen se imprime tal
- * cual. Lo que sí se exige es que ninguna del corte quede sin diagnóstico por la
- * regla 8, porque el modelo se entrenó con su fila completa.
+ * cada una. Se exige que todas salgan completa o parcial, nunca rechazada, porque
+ * el modelo se entrenó con ellas, y que ninguna quede sin diagnóstico por la regla 8,
+ * porque su fila está completa.
  */
 class ValidacionCorteTest {
     private val contrato = LectorContrato.desdeJson(File(Recursos.MODELO, "contrato_modelo.json").readText())
@@ -36,6 +36,16 @@ class ValidacionCorteTest {
         }
         informe.append("Resumen: $conteo")
         println(informe)
+    }
+
+    @Test
+    fun ningunaDelCorteSaleRechazada() {
+        val rechazadas = Recursos.CORTE.mapNotNull { id ->
+            val d = validador.validar(Recursos.lector.leer(id))
+            if (d.resultado == ResultadoDictamen.RECHAZADA) "$id (${d.observacion})" else null
+        }
+        assertEquals(25, Recursos.CORTE.size)
+        assertTrue("Atenciones del corte rechazadas: $rechazadas", rechazadas.isEmpty())
     }
 
     @Test
