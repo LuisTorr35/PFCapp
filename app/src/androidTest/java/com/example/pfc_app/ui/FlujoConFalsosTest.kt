@@ -136,8 +136,8 @@ class FlujoConFalsosTest {
         pasos.esperar(10_000, "aviso de guardada sin diagnóstico") {
             pasos.existe(hasTestTag(E.DIALOGO_GUARDADA_SIN_DIAGNOSTICO))
         }
-        compose.onNodeWithTag(E.DIALOGO_GUARDADA_SIN_DIAGNOSTICO)
-            .assertTextContains("no expone los parámetros que requiere el modelo", substring = true)
+        // El AlertDialog no fusiona el texto de sus hijos: se busca el texto en sus nodos.
+        compose.onNodeWithText("no expone los parámetros que requiere el modelo", substring = true).assertExists()
         assertEquals(1, contenedor.repositorioAtenciones.listarPorVehiculo(1).size)
         compose.onNodeWithTag(E.BOTON_ACEPTAR_SIN_DIAGNOSTICO).performClick()
 
