@@ -1,6 +1,10 @@
 package com.example.pfc_app.ui
 
 import android.Manifest
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,6 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.pfc_app.Registro
+import com.example.pfc_app.adquisicion.DispositivosBluetooth
 import com.example.pfc_app.modelos.Vehiculo
 import com.example.pfc_app.ui.theme.Blanco
 import com.example.pfc_app.ui.theme.GrisBorde
@@ -82,13 +88,55 @@ fun PantallaVehiculo(
     var pendiente by remember { mutableStateOf<Vehiculo?>(null) }
     var pidiendoParaSelector by remember { mutableStateOf(false) }
 
+    // Acción que espera a que el mecánico encienda el Bluetooth.
+    var trasEncender by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    val lanzadorEncender = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        val accion = trasEncender
+        trasEncender = null
+        if (r.resultCode == Activity.RESULT_OK || DispositivosBluetooth.disponible(contexto)) {
+            Registro.i(Registro.BT, "El mecánico encendió el Bluetooth")
+            accion?.invoke()
+        } else {
+            Registro.w(Registro.BT, "El mecánico no encendió el Bluetooth")
+            vm.mostrarError("El Bluetooth sigue apagado. Sin él no se puede usar el adaptador ELM327.")
+        }
+    }
+
+    /** Ejecuta [accion] con el Bluetooth encendido; si está apagado, pide encenderlo primero. */
+    fun conBluetoothEncendido(accion: () -> Unit) {
+        when {
+            !DispositivosBluetooth.existe(contexto) -> vm.mostrarError("Este teléfono no tiene Bluetooth.")
+            DispositivosBluetooth.disponible(contexto) -> accion()
+            else -> {
+                Registro.i(Registro.BT, "Bluetooth apagado: se pide encenderlo")
+                trasEncender = accion
+                try {
+                    lanzadorEncender.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+                } catch (e: SecurityException) {
+                    trasEncender = null
+                    Registro.w(Registro.BT, "No se pudo pedir encender el Bluetooth", e)
+                    vm.mostrarError("Encienda el Bluetooth del teléfono y vuelva a intentarlo.")
+                } catch (e: ActivityNotFoundException) {
+                    trasEncender = null
+                    Registro.w(Registro.BT, "El teléfono no ofrece la pantalla para encender el Bluetooth", e)
+                    vm.mostrarError("Encienda el Bluetooth del teléfono y vuelva a intentarlo.")
+                }
+            }
+        }
+    }
+
     val lanzadorPermiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { concedido ->
         if (!concedido) {
-            vm.mostrarError("Sin el permiso de dispositivos cercanos no se puede usar el adaptador Bluetooth.")
+            Registro.w(Registro.BT, "El mecánico rechazó el permiso BLUETOOTH_CONNECT")
+            vm.mostrarError(
+                "Sin el permiso de dispositivos cercanos no se puede usar el adaptador Bluetooth. " +
+                    "Puede concederlo en Ajustes › Aplicaciones › PFCapp › Permisos.",
+            )
         } else if (pidiendoParaSelector) {
-            vm.abrirSelectorAdaptador()
+            conBluetoothEncendido { vm.abrirSelectorAdaptador() }
         } else {
-            pendiente?.let { alAtender(it, null, false) }
+            pendiente?.let { v -> conBluetoothEncendido { alAtender(v, null, false) } }
         }
         pendiente = null
         pidiendoParaSelector = false
@@ -100,7 +148,7 @@ fun PantallaVehiculo(
 
     fun elegirAdaptador() {
         if (tienePermisoBluetooth()) {
-            vm.abrirSelectorAdaptador()
+            conBluetoothEncendido { vm.abrirSelectorAdaptador() }
         } else {
             pidiendoParaSelector = true
             lanzadorPermiso.launch(Manifest.permission.BLUETOOTH_CONNECT)
@@ -116,7 +164,7 @@ fun PantallaVehiculo(
                 pidiendoParaSelector = false
                 lanzadorPermiso.launch(Manifest.permission.BLUETOOTH_CONNECT)
             }
-            else -> alAtender(v, null, false)
+            else -> conBluetoothEncendido { alAtender(v, null, false) }
         }
     }
 
