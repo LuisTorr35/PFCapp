@@ -1,0 +1,638 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "a7b5f162244f78b2141be9d9828d9dd7",
+    "entities": [
+      {
+        "tableName": "vehiculo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_vehiculo` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `codigo` TEXT NOT NULL, `marca` TEXT NOT NULL, `modelo` TEXT NOT NULL, `anio` INTEGER NOT NULL, `cilindros` INTEGER NOT NULL, `familia_gestion` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "idVehiculo",
+            "columnName": "id_vehiculo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "codigo",
+            "columnName": "codigo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "marca",
+            "columnName": "marca",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modelo",
+            "columnName": "modelo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "anio",
+            "columnName": "anio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cilindros",
+            "columnName": "cilindros",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "familiaGestion",
+            "columnName": "familia_gestion",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_vehiculo"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_vehiculo_codigo",
+            "unique": true,
+            "columnNames": [
+              "codigo"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `idx_vehiculo_codigo` ON `${TABLE_NAME}` (`codigo`)"
+          }
+        ]
+      },
+      {
+        "tableName": "atencion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_atencion` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_vehiculo` INTEGER NOT NULL, `fecha` TEXT NOT NULL, `baro_kpa` REAL, FOREIGN KEY(`id_vehiculo`) REFERENCES `vehiculo`(`id_vehiculo`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "idAtencion",
+            "columnName": "id_atencion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idVehiculo",
+            "columnName": "id_vehiculo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baroKpa",
+            "columnName": "baro_kpa",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_atencion"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_atencion_vehiculo_fecha",
+            "unique": false,
+            "columnNames": [
+              "id_vehiculo",
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_atencion_vehiculo_fecha` ON `${TABLE_NAME}` (`id_vehiculo`, `fecha`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "vehiculo",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_vehiculo"
+            ],
+            "referencedColumns": [
+              "id_vehiculo"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "regimen",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_regimen` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_atencion` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `muestras_utiles` INTEGER NOT NULL DEFAULT 0, `descartadas_transitorio` INTEGER NOT NULL DEFAULT 0, `descartadas_techo` INTEGER NOT NULL DEFAULT 0, `frecuencia_hz` REAL, FOREIGN KEY(`id_atencion`) REFERENCES `atencion`(`id_atencion`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idRegimen",
+            "columnName": "id_regimen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idAtencion",
+            "columnName": "id_atencion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "muestrasUtiles",
+            "columnName": "muestras_utiles",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "descartadasTransitorio",
+            "columnName": "descartadas_transitorio",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "descartadasTecho",
+            "columnName": "descartadas_techo",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "frecuenciaHz",
+            "columnName": "frecuencia_hz",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_regimen"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_regimen_atencion_tipo",
+            "unique": true,
+            "columnNames": [
+              "id_atencion",
+              "tipo"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `idx_regimen_atencion_tipo` ON `${TABLE_NAME}` (`id_atencion`, `tipo`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "atencion",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_atencion"
+            ],
+            "referencedColumns": [
+              "id_atencion"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "lectura",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_lectura` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_regimen` INTEGER NOT NULL, `instante` REAL NOT NULL, `rpm` REAL, `temp_refrigerante` REAL, `stft` REAL, `ltft` REAL, `carga_calculada` REAL, `avance_encendido` REAL, `maf` REAL, `map` REAL, `velocidad` INTEGER, FOREIGN KEY(`id_regimen`) REFERENCES `regimen`(`id_regimen`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idLectura",
+            "columnName": "id_lectura",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idRegimen",
+            "columnName": "id_regimen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "instante",
+            "columnName": "instante",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rpm",
+            "columnName": "rpm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "tempRefrigerante",
+            "columnName": "temp_refrigerante",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "stft",
+            "columnName": "stft",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "ltft",
+            "columnName": "ltft",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "cargaCalculada",
+            "columnName": "carga_calculada",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "avanceEncendido",
+            "columnName": "avance_encendido",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maf",
+            "columnName": "maf",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "map",
+            "columnName": "map",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "velocidad",
+            "columnName": "velocidad",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_lectura"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_lectura_regimen_instante",
+            "unique": false,
+            "columnNames": [
+              "id_regimen",
+              "instante"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_lectura_regimen_instante` ON `${TABLE_NAME}` (`id_regimen`, `instante`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "regimen",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_regimen"
+            ],
+            "referencedColumns": [
+              "id_regimen"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "codigo_dtc",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_codigo` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_atencion` INTEGER NOT NULL, `codigo` TEXT NOT NULL, `tipo` TEXT NOT NULL, FOREIGN KEY(`id_atencion`) REFERENCES `atencion`(`id_atencion`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idCodigo",
+            "columnName": "id_codigo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idAtencion",
+            "columnName": "id_atencion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "codigo",
+            "columnName": "codigo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_codigo"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_codigo_dtc_atencion",
+            "unique": false,
+            "columnNames": [
+              "id_atencion"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_codigo_dtc_atencion` ON `${TABLE_NAME}` (`id_atencion`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "atencion",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_atencion"
+            ],
+            "referencedColumns": [
+              "id_atencion"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "contador_modo06",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_contador` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_atencion` INTEGER NOT NULL, `cilindro` INTEGER NOT NULL, `conteo_fallo` INTEGER, `conteo_promedio` INTEGER, FOREIGN KEY(`id_atencion`) REFERENCES `atencion`(`id_atencion`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idContador",
+            "columnName": "id_contador",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idAtencion",
+            "columnName": "id_atencion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cilindro",
+            "columnName": "cilindro",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conteoFallo",
+            "columnName": "conteo_fallo",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "conteoPromedio",
+            "columnName": "conteo_promedio",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_contador"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_contador_modo06_atencion",
+            "unique": false,
+            "columnNames": [
+              "id_atencion"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_contador_modo06_atencion` ON `${TABLE_NAME}` (`id_atencion`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "atencion",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_atencion"
+            ],
+            "referencedColumns": [
+              "id_atencion"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "dictamen",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_dictamen` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_atencion` INTEGER NOT NULL, `resultado` TEXT NOT NULL, `observacion` TEXT, FOREIGN KEY(`id_atencion`) REFERENCES `atencion`(`id_atencion`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idDictamen",
+            "columnName": "id_dictamen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idAtencion",
+            "columnName": "id_atencion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resultado",
+            "columnName": "resultado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observacion",
+            "columnName": "observacion",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_dictamen"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_dictamen_atencion",
+            "unique": true,
+            "columnNames": [
+              "id_atencion"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `idx_dictamen_atencion` ON `${TABLE_NAME}` (`id_atencion`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "atencion",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_atencion"
+            ],
+            "referencedColumns": [
+              "id_atencion"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "diagnostico",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_diagnostico` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_atencion` INTEGER NOT NULL, `clase` TEXT NOT NULL, `probabilidad` REAL NOT NULL, `version_modelo` TEXT NOT NULL, FOREIGN KEY(`id_atencion`) REFERENCES `atencion`(`id_atencion`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idDiagnostico",
+            "columnName": "id_diagnostico",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idAtencion",
+            "columnName": "id_atencion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clase",
+            "columnName": "clase",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "probabilidad",
+            "columnName": "probabilidad",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "versionModelo",
+            "columnName": "version_modelo",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_diagnostico"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_diagnostico_atencion",
+            "unique": true,
+            "columnNames": [
+              "id_atencion"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `idx_diagnostico_atencion` ON `${TABLE_NAME}` (`id_atencion`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "atencion",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_atencion"
+            ],
+            "referencedColumns": [
+              "id_atencion"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "parametro_desviado",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_parametro` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_diagnostico` INTEGER NOT NULL, `parametro` TEXT NOT NULL, `valor` REAL NOT NULL, `referencia` REAL, `direccion` TEXT NOT NULL, FOREIGN KEY(`id_diagnostico`) REFERENCES `diagnostico`(`id_diagnostico`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idParametro",
+            "columnName": "id_parametro",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idDiagnostico",
+            "columnName": "id_diagnostico",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parametro",
+            "columnName": "parametro",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "valor",
+            "columnName": "valor",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "referencia",
+            "columnName": "referencia",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "direccion",
+            "columnName": "direccion",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_parametro"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_parametro_desviado_diagnostico",
+            "unique": false,
+            "columnNames": [
+              "id_diagnostico"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_parametro_desviado_diagnostico` ON `${TABLE_NAME}` (`id_diagnostico`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "diagnostico",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_diagnostico"
+            ],
+            "referencedColumns": [
+              "id_diagnostico"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a7b5f162244f78b2141be9d9828d9dd7')"
+    ]
+  }
+}
