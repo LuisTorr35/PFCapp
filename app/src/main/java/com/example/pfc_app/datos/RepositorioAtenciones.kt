@@ -56,7 +56,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
             val idAtencion = db.insertOrThrow("atencion", null, ContentValues().apply {
                 put("id_vehiculo", atencion.idVehiculo)
                 put("fecha", FechasIso.normalizar(atencion.fecha))
-                putDoble("baro_kpa", atencion.baroKpa)
+                putDoble("baro_kpa", atencion.barometricaSesion)
             })
             val sentenciaLectura = db.compileStatement(INSERTAR_LECTURA)
             try {
