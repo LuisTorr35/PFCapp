@@ -1,0 +1,78 @@
+{
+  "descripcion": "Atenciones reales grabadas con registrar_obd.py (copias sin modificar de datos/crudo del repositorio de la tesis). Marca, modelo, año y cilindros de la hoja Atenciones de ficha_registro_obd2.xlsx; protocolo del contacto o de la bitácora del vehículo.",
+  "grabaciones": [
+    {
+      "id": "ATN-033",
+      "descripcion": "ATN-033 · Kia Picanto 2019",
+      "marca": "Kia",
+      "modelo": "Picanto",
+      "anio": 2019,
+      "cilindros": 4,
+      "protocolo": "ISO 15765-4 (CAN 11/500)",
+      "familia_gestion": "MAP",
+      "clase_confirmada": "C0",
+      "nota": "Sin falla de motor. Llegó frío: trae R1",
+      "tiene_r1": true
+    },
+    {
+      "id": "ATN-037",
+      "descripcion": "ATN-037 · Hyundai Tucson 2011",
+      "marca": "Hyundai",
+      "modelo": "Tucson",
+      "anio": 2011,
+      "cilindros": 4,
+      "protocolo": "ISO 15765-4 (CAN 11/500)",
+      "familia_gestion": "MAP",
+      "clase_confirmada": "C1",
+      "nota": "Falla inducida de encendido y combustión"
+    },
+    {
+      "id": "ATN-023",
+      "descripcion": "ATN-023 · Toyota Agya 2021",
+      "marca": "Toyota",
+      "modelo": "Agya",
+      "anio": 2021,
+      "cilindros": 4,
+      "protocolo": "ISO 15765-4 (CAN 11/500)",
+      "familia_gestion": "MAF",
+      "clase_confirmada": "C2",
+      "nota": "Falla inducida de mezcla de aire y combustible"
+    },
+    {
+      "id": "ATN-035",
+      "descripcion": "ATN-035 · Hyundai Tucson 2011",
+      "marca": "Hyundai",
+      "modelo": "Tucson",
+      "anio": 2011,
+      "cilindros": 4,
+      "protocolo": "ISO 15765-4 (CAN 11/500)",
+      "familia_gestion": "MAP",
+      "clase_confirmada": "C3",
+      "nota": "Falla inducida de admisión (sensor MAP), con P0107 y P0113 pendientes"
+    },
+    {
+      "id": "ATN-036",
+      "descripcion": "ATN-036 · Hyundai Tucson 2011",
+      "marca": "Hyundai",
+      "modelo": "Tucson",
+      "anio": 2011,
+      "cilindros": 4,
+      "protocolo": "ISO 15765-4 (CAN 11/500)",
+      "familia_gestion": "MAP",
+      "clase_confirmada": "C2",
+      "nota": "Sin ajuste de largo plazo en R3: se guarda sin diagnóstico (regla 8)"
+    },
+    {
+      "id": "ATN-026",
+      "descripcion": "ATN-026 · Hyundai Accent 2000",
+      "marca": "Hyundai",
+      "modelo": "Accent",
+      "anio": 2000,
+      "cilindros": 4,
+      "protocolo": "ISO 9141-2",
+      "familia_gestion": "MAP",
+      "clase_confirmada": "C0",
+      "nota": "Línea K (ISO 9141-2), motor en la dirección 11; P0507 guardado"
+    }
+  ]
+}
