@@ -7,15 +7,16 @@ import com.example.pfc_app.modelos.TipoRegimen
 import com.example.pfc_app.procesamiento.ReglaMuestras
 
 /**
- * Regla 4 (obligatoria): el refrigerante en R2 se mantiene por encima de 84 °C en
- * todo el tramo evaluado, es decir, en las muestras útiles que traen refrigerante.
+ * Regla 4 (obligatoria): el refrigerante en R2 se mantiene en 84 °C o más en todo
+ * el tramo evaluado, es decir, en las muestras útiles que traen refrigerante. El
+ * límite es inclusivo: 84,0 °C cumple (ATN-015 tiene dos muestras en 84,0 °C).
  * Garantiza lazo cerrado y ajustes de combustible interpretables. Si el vehículo
  * no entrega el refrigerante en R2 no se puede verificar y la atención se degrada.
  */
 class ReglaTemperaturaR2(private val umbral: Double = UMBRAL_C) : ReglaBase() {
     override val numero = 4
     override val nivel = NivelRegla.OBLIGATORIA
-    override val descripcion = "Refrigerante en R2 por encima de ${texto(umbral)} °C en todo el tramo evaluado"
+    override val descripcion = "Refrigerante en R2 de ${texto(umbral)} °C o más en todo el tramo evaluado"
 
     override fun evaluar(atencion: Atencion): ResultadoRegla {
         val r2 = atencion.regimen(TipoRegimen.R2) ?: return cumple("No aplica: falta R2 (ver regla 1)")
@@ -27,10 +28,10 @@ class ReglaTemperaturaR2(private val umbral: Double = UMBRAL_C) : ReglaBase() {
             )
         }
         val minimo = ect.min()
-        return if (minimo > umbral) cumple(regimen = TipoRegimen.R2)
+        return if (minimo >= umbral) cumple(regimen = TipoRegimen.R2)
         else rechaza(
-            "El refrigerante en R2 bajó a ${texto(minimo)} °C: el ralentí caliente exige más de " +
-                "${texto(umbral)} °C en todo el tramo (motor sin calentar)",
+            "El refrigerante en R2 bajó a ${texto(minimo)} °C: el ralentí caliente exige " +
+                "${texto(umbral)} °C o más en todo el tramo (motor sin calentar)",
             TipoRegimen.R2,
         )
     }
