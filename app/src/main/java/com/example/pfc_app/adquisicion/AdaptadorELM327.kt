@@ -45,8 +45,14 @@ interface AdaptadorELM327 {
     /** Contadores de fallo de encendido por cilindro del modo 06. Lista vacía si el vehículo no los expone. */
     suspend fun leerContadoresModo06(): List<ContadorModo06>
 
-    /** Presión barométrica de la sesión (PID 0x33, o la del múltiple con el motor apagado). */
+    /** Presión barométrica que entrega el vehículo (PID 0x33), o null si no la expone. */
     suspend fun leerBarometrica(): Double?
+
+    /**
+     * Presión del múltiple (PID 0x0B) leída con el motor apagado en el contacto: es la
+     * atmosférica y reemplaza a la barométrica si el vehículo no expone el PID 0x33.
+     */
+    suspend fun leerMapContacto(): Double? = null
 
     /** Temperatura del refrigerante en este momento (PID 0x05), para decidir R1 y R2. */
     suspend fun leerTemperaturaRefrigerante(): Double?

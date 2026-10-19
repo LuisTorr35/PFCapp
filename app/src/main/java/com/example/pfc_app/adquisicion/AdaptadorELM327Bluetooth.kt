@@ -164,20 +164,21 @@ class AdaptadorELM327Bluetooth(
         salida
     }
 
-    /** PID 0x33 leído en el sondeo; si el vehículo no lo expone, la MAP con el motor apagado. */
+    /** PID 0x33 leído en el sondeo, o null si el vehículo no lo expone. */
     override suspend fun leerBarometrica(): Double? {
         if (sondeo.baro == null && cliente != null) {
             sondeo.baro = conReconexion("leer barométrica") { c ->
                 c.consultarPid(PidOBD.BAROMETRIC_PRESSURE.codigo)?.let { PidOBD.BAROMETRIC_PRESSURE.decodificar(it) }
             }
         }
-        val baro = sondeo.baro ?: sondeo.mapMotorApagado
-        Registro.i(
-            Registro.BT,
-            "Barométrica: ${baro ?: "no disponible"}" +
-                if (sondeo.baro == null && baro != null) " kPa (MAP con el motor apagado)" else " kPa",
-        )
-        return baro
+        Registro.i(Registro.BT, "Barométrica (PID 0x33): ${sondeo.baro ?: "no la expone el vehículo"}")
+        return sondeo.baro
+    }
+
+    /** MAP (PID 0x0B) leída en el sondeo con el motor apagado. */
+    override suspend fun leerMapContacto(): Double? {
+        Registro.i(Registro.BT, "MAP con el motor apagado: ${sondeo.mapMotorApagado ?: "no disponible"}")
+        return sondeo.mapMotorApagado
     }
 
     override suspend fun leerTemperaturaRefrigerante(): Double? = conReconexion("leer refrigerante") { c ->

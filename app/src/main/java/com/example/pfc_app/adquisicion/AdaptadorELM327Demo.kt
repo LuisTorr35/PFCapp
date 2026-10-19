@@ -87,6 +87,8 @@ class AdaptadorELM327Demo(
 
     override suspend fun leerBarometrica(): Double? = lector.barometrica(grabacion.id)
 
+    override suspend fun leerMapContacto(): Double? = lector.mapContacto(grabacion.id)
+
     /**
      * Antes de reproducir nada, el refrigerante inicial: el primero de R1 si la
      * grabación lo trae (motor frío) o, si no, el primero de R2 (motor caliente).
