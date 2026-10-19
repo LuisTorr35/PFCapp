@@ -30,9 +30,8 @@ object DispositivosBluetooth {
     }
 
     /** true si la aplicación tiene el permiso que pide la conexión (BLUETOOTH_CONNECT desde Android 12). */
-    fun tienePermiso(contexto: Context): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            contexto.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+    fun tienePermiso(contexto: Context): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+        contexto.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
 
     /**
      * Dispositivos vinculados, con los que parecen adaptadores OBD-II primero
@@ -52,8 +51,7 @@ object DispositivosBluetooth {
         }
     }
 
-    private fun adaptador(contexto: Context): BluetoothAdapter? =
-        contexto.getSystemService(BluetoothManager::class.java)?.adapter
+    private fun adaptador(contexto: Context): BluetoothAdapter? = contexto.getSystemService(BluetoothManager::class.java)?.adapter
 
     private fun pareceObd(nombre: String): Boolean {
         val n = nombre.uppercase()

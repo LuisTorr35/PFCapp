@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.update
 object Falsos {
     val grabaciones = listOf(
         GrabacionDemo("ATN-037", "ATN-037 · Hyundai Tucson 2011", "Hyundai", "Tucson", 2011, 4),
-        GrabacionDemo("ATN-012", "ATN-012 · Kia Picanto 2019", "Kia", "Picanto", 2019, 4),
+        GrabacionDemo("ATN-012", "ATN-012 · Kia Picanto 2019", "Kia", "Picanto", 2019, 4)
     )
 
     val catalogo = object : CatalogoDemo {
@@ -62,16 +62,22 @@ object Falsos {
             ClaseModelo(0, "C0", "Sin falla de motor"),
             ClaseModelo(1, "C1", "Encendido y combustión"),
             ClaseModelo(2, "C2", "Mezcla de aire y combustible"),
-            ClaseModelo(3, "C3", "Admisión y flujo de aire"),
+            ClaseModelo(3, "C3", "Admisión y flujo de aire")
         ),
         caracteristicas = listOf(
             CaracteristicaModelo(
-                1, "R2_rpm_desv", "Variación de rpm en ralentí caliente", "rpm", TipoRegimen.R2, "rpm", "desv",
-                ReferenciaSinFalla(5.89, 3.84, 8.44, 9.07, -3.06, 15.33),
-            ),
+                1,
+                "R2_rpm_desv",
+                "Variación de rpm en ralentí caliente",
+                "rpm",
+                TipoRegimen.R2,
+                "rpm",
+                "desv",
+                ReferenciaSinFalla(5.89, 3.84, 8.44, 9.07, -3.06, 15.33)
+            )
         ),
         regimenesRequeridos = listOf(TipoRegimen.R2, TipoRegimen.R3),
-        columnasLecturaRequeridas = listOf("rpm", "carga_calculada", "stft", "ltft", "avance_encendido"),
+        columnasLecturaRequeridas = listOf("rpm", "carga_calculada", "stft", "ltft", "avance_encendido")
     )
 
     /** R2 con menos de 45 muestras útiles rechaza; [sinParametros] imita la regla 8. */
@@ -82,10 +88,17 @@ object Falsos {
             return Dictamen(
                 resultado = ResultadoDictamen.RECHAZADA,
                 reglas = listOf(
-                    ResultadoRegla(2, NivelRegla.OBLIGATORIA, "45 muestras útiles por régimen", EfectoRegla.RECHAZA, TipoRegimen.R2, motivo),
+                    ResultadoRegla(
+                        2,
+                        NivelRegla.OBLIGATORIA,
+                        "45 muestras útiles por régimen",
+                        EfectoRegla.RECHAZA,
+                        TipoRegimen.R2,
+                        motivo
+                    )
                 ),
                 regimenesARepetir = listOf(TipoRegimen.R2),
-                observacion = motivo,
+                observacion = motivo
             )
         }
         return Dictamen(ResultadoDictamen.COMPLETA, emptyList(), faltanParametrosModelo = sinParametros)
@@ -98,10 +111,10 @@ object Falsos {
         versionModelo = "0.1.0-provisional",
         parametrosDesviados = listOf(
             // Sin etiqueta ni unidad: la pantalla debe completarlas con el contrato.
-            ParametroDesviado("R2_rpm_desv", 14.9, 3.5, Direccion.MAYOR),
+            ParametroDesviado("R2_rpm_desv", 14.9, 3.5, Direccion.MAYOR)
         ),
         codigosLeidos = a.codigos,
-        modeloProvisional = true,
+        modeloProvisional = true
     )
 }
 
@@ -162,7 +175,7 @@ class ServicioFalso(private val r2Corto: Boolean) : ServicioAdquisicion {
             protocolo = "ISO 15765-4 (CAN 11/500)",
             codigos = codigos,
             contadoresModo06 = contadores,
-            regimenes = mapOf(TipoRegimen.R2 to r2, TipoRegimen.R3 to r3),
+            regimenes = mapOf(TipoRegimen.R2 to r2, TipoRegimen.R3 to r3)
         )
         atencion = a
         _estado.update { it.copy(terminada = true) }
@@ -193,7 +206,7 @@ class ServicioFalso(private val r2Corto: Boolean) : ServicioAdquisicion {
         val lecturas = (0 until muestras).map { i ->
             Lectura(
                 instante = i * 0.4, rpm = 800.0 + i % 4 * 0.25, tempRefrigerante = 88.0, stft = 1.5, ltft = 9.4,
-                cargaCalculada = 23.0, avanceEncendido = 8.0, maf = null, map = 35.0, velocidad = 0.0,
+                cargaCalculada = 23.0, avanceEncendido = 8.0, maf = null, map = 35.0, velocidad = 0.0
             )
         }
         return Regimen(tipo = tipo, lecturas = lecturas, muestrasUtiles = muestras, frecuenciaHz = 2.5)

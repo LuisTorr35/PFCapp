@@ -19,7 +19,7 @@ object Recursos {
         "ATN-001", "ATN-006", "ATN-007", "ATN-009", "ATN-013", "ATN-021", "ATN-026", "ATN-033", "ATN-034",
         "ATN-005", "ATN-010", "ATN-014", "ATN-022", "ATN-037",
         "ATN-002", "ATN-015", "ATN-020", "ATN-023", "ATN-028",
-        "ATN-004", "ATN-016", "ATN-019", "ATN-024", "ATN-027", "ATN-035",
+        "ATN-004", "ATN-016", "ATN-019", "ATN-024", "ATN-027", "ATN-035"
     )
 
     val lector: LectorCsvAtencion by lazy { LectorCsvAtencion(FuenteArchivosCarpeta(CRUDO)) }

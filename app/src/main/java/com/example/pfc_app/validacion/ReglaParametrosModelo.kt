@@ -18,10 +18,7 @@ import com.example.pfc_app.procesamiento.ReglaMuestras
  * historial sin diagnóstico (CU-05, excepción E1). Un régimen ausente no se
  * evalúa aquí, porque ya lo rechazan las reglas 1 y 2.
  */
-class ReglaParametrosModelo(
-    private val contrato: ContratoModelo,
-    private val coberturaMinima: Double = COBERTURA_MINIMA,
-) : ReglaBase() {
+class ReglaParametrosModelo(private val contrato: ContratoModelo, private val coberturaMinima: Double = COBERTURA_MINIMA) : ReglaBase() {
     override val numero = 8
     override val nivel = NivelRegla.OBLIGATORIA
     override val descripcion =
@@ -49,7 +46,7 @@ class ReglaParametrosModelo(
         return sinDiagnostico(
             "El vehículo no expone los parámetros que requiere el modelo: ${faltantes.joinToString("; ")}. " +
                 "Se exige ${(coberturaMinima * 100).toInt()} %; la atención se guarda sin diagnóstico",
-            primerRegimen,
+            primerRegimen
         )
     }
 

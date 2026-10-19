@@ -49,7 +49,7 @@ fun PantallaCaptura(
     vm: CapturaViewModel,
     alVolver: () -> Unit,
     alAbrirDiagnostico: () -> Unit,
-    alAbrirHistorial: (idVehiculo: Long, aviso: String) -> Unit,
+    alAbrirHistorial: (idVehiculo: Long, aviso: String) -> Unit
 ) {
     val estado by vm.estado.collectAsStateWithLifecycle()
     var confirmarSalida by remember { mutableStateOf(false) }
@@ -74,13 +74,13 @@ fun PantallaCaptura(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (estado.modoDemostracion) {
                 val g = estado.grabacion
                 AvisoDemostracion(
                     idGrabacion = g?.id,
-                    detalle = g?.let { "Vehículo grabado: ${it.marca} ${it.modelo} ${it.anio}, ${Formatos.cilindros(it.cilindros)}" },
+                    detalle = g?.let { "Vehículo grabado: ${it.marca} ${it.modelo} ${it.anio}, ${Formatos.cilindros(it.cilindros)}" }
                 )
             }
             val error = estado.error ?: estado.captura.error
@@ -110,15 +110,15 @@ fun PantallaCaptura(
             text = {
                 Text(
                     "El vehículo no expone los parámetros que requiere el modelo. " +
-                        "La atención quedó guardada en el historial del vehículo sin diagnóstico.",
+                        "La atención quedó guardada en el historial del vehículo sin diagnóstico."
                 )
             },
             confirmButton = {
                 TextButton(
                     onClick = vm::aceptarSinDiagnostico,
-                    modifier = Modifier.testTag(EtiquetasPrueba.BOTON_ACEPTAR_SIN_DIAGNOSTICO),
+                    modifier = Modifier.testTag(EtiquetasPrueba.BOTON_ACEPTAR_SIN_DIAGNOSTICO)
                 ) { Text("Aceptar", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) }
-            },
+            }
         )
     }
 
@@ -128,13 +128,16 @@ fun PantallaCaptura(
             title = { Text("¿Salir de la captura?") },
             text = { Text("La atención no se ha guardado y se descartará.") },
             confirmButton = {
-                TextButton(onClick = { confirmarSalida = false; alVolver() }) {
+                TextButton(onClick = {
+                    confirmarSalida = false
+                    alVolver()
+                }) {
                     Text("Salir y descartar", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmarSalida = false }) { Text("Seguir aquí", color = MaterialTheme.colorScheme.onSurface) }
-            },
+            }
         )
     }
 }
@@ -144,12 +147,17 @@ private fun TarjetaAdaptador(estado: EstadoPantallaCaptura) {
     val c = estado.captura
     val enlace = when (c.enlace) {
         EstadoEnlace.CONECTADO -> if (estado.modoDemostracion) "Reproducción de atención grabada" else "Conectado por Bluetooth"
+
         EstadoEnlace.CONECTANDO -> if (estado.modoDemostracion) "Abriendo la atención grabada…" else "Conectando con el adaptador…"
+
         EstadoEnlace.RECONECTANDO -> "Reconectando…"
+
         EstadoEnlace.DESCONECTADO -> when {
-            estado.fase == FaseCaptura.PREPARANDO || estado.fase == FaseCaptura.CAPTURANDO && !c.lecturaInicialHecha ->
+            estado.fase == FaseCaptura.PREPARANDO || (estado.fase == FaseCaptura.CAPTURANDO && !c.lecturaInicialHecha) ->
                 if (estado.modoDemostracion) "Reproducción de atención grabada · preparando" else "Conectando con el adaptador…"
+
             estado.modoDemostracion -> "Reproducción de atención grabada"
+
             else -> "Desconectado"
         }
     }
@@ -203,18 +211,23 @@ private fun TarjetaRegimen(tipo: TipoRegimen, estado: EstadoPantallaCaptura, alR
                 TituloTarjeta("${tipo.name} · ${tipo.nombre}")
                 val linea = when {
                     rechazado && !enRepeticion -> "Rechazado · ${p.muestrasUtiles} de ${p.objetivo} muestras útiles"
+
                     p.estado == EstadoRegimen.CAPTURANDO -> "Capturando · ${p.muestrasUtiles}/${p.objetivo} muestras útiles"
+
                     p.estado == EstadoRegimen.CAPTURADO -> "Capturado · ${p.muestrasUtiles} muestras útiles"
+
                     p.estado == EstadoRegimen.OMITIDO ->
                         "No capturado" + (p.motivoOmision?.takeIf { it.isNotBlank() }?.let { " · $it" } ?: "")
+
                     enRepeticion -> "Por repetir"
+
                     else -> "Pendiente"
                 }
                 TextoTarjeta(linea)
                 if (p.estado == EstadoRegimen.CAPTURANDO) {
                     val lecturas = listOfNotNull(
                         p.rpm?.let { "${Formatos.numero(it, 0)} rpm" },
-                        p.ect?.let { "refrigerante ${Formatos.numero(it, 0)} °C" },
+                        p.ect?.let { "refrigerante ${Formatos.numero(it, 0)} °C" }
                     )
                     if (lecturas.isNotEmpty()) TextoSecundario(lecturas.joinToString(" · "))
                     BarraAvance(if (p.objetivo > 0) p.muestrasUtiles.toFloat() / p.objetivo else 0f)
@@ -227,7 +240,7 @@ private fun TarjetaRegimen(tipo: TipoRegimen, estado: EstadoPantallaCaptura, alR
                     "Repetir ${tipo.name}",
                     { alRepetir(tipo) },
                     Modifier.testTag(EtiquetasPrueba.botonRepetir(tipo)),
-                    habilitado = estado.puedeRepetir,
+                    habilitado = estado.puedeRepetir
                 )
             }
         }
@@ -243,9 +256,11 @@ private fun TarjetaDictamen(estado: EstadoPantallaCaptura) {
             Text("Dictamen: ${d.resultado.texto}", fontSize = 21.sp, fontWeight = FontWeight.Bold)
             when (d.resultado) {
                 ResultadoDictamen.COMPLETA -> TextoTarjeta("Se cumplen todas las reglas de validación.")
+
                 ResultadoDictamen.PARCIAL -> TextoTarjeta(
-                    Formatos.motivoDictamen(d, EfectoRegla.DEGRADA).ifBlank { "Se incumple alguna regla graduada." },
+                    Formatos.motivoDictamen(d, EfectoRegla.DEGRADA).ifBlank { "Se incumple alguna regla graduada." }
                 )
+
                 ResultadoDictamen.RECHAZADA -> {
                     TextoTarjeta(Formatos.motivoDictamen(d, EfectoRegla.RECHAZA).ifBlank { "Se incumple una regla obligatoria." })
                     TextoTarjeta(Formatos.indicacionRepeticion(d.regimenesARepetir, estado.regimenesCapturados))
@@ -257,14 +272,16 @@ private fun TarjetaDictamen(estado: EstadoPantallaCaptura) {
                     "El vehículo no expone los parámetros que pide el modelo. " +
                         "Al pulsar «Diagnosticar», la atención se guardará en el historial sin diagnóstico.",
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
+
         estado.fase == FaseCaptura.VALIDANDO -> Tarjeta(Modifier.testTag(EtiquetasPrueba.TARJETA_DICTAMEN)) {
             TituloTarjeta("Dictamen")
             TextoSecundario("Validando la atención…")
         }
+
         estado.fase == FaseCaptura.REPITIENDO -> Tarjeta(Modifier.testTag(EtiquetasPrueba.TARJETA_DICTAMEN)) {
             TituloTarjeta("Dictamen")
             TextoSecundario("Repitiendo ${estado.regimenEnRepeticion?.name.orEmpty()}. Al terminar se vuelve a validar la atención.")
@@ -285,7 +302,7 @@ private fun PieCaptura(estado: EstadoPantallaCaptura, vm: CapturaViewModel) {
                 fondo = AmarilloAviso.copy(alpha = 0.35f),
                 borde = Negro,
                 grosorBorde = 2,
-                fusionar = false,
+                fusionar = false
             ) {
                 Text(c.instruccion ?: "Confirme para continuar.", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 if (c.esperaConfirmacion) {
@@ -311,7 +328,7 @@ private fun PieCaptura(estado: EstadoPantallaCaptura, vm: CapturaViewModel) {
             "Diagnosticar",
             vm::diagnosticar,
             Modifier.testTag(EtiquetasPrueba.BOTON_DIAGNOSTICAR),
-            habilitado = estado.puedeDiagnosticar,
+            habilitado = estado.puedeDiagnosticar
         )
     }
 }

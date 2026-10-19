@@ -32,7 +32,7 @@ data class ConfiguracionCaptura(
     /** En demostración, cuánto se muestra cada instrucción antes de avanzar sola. */
     val pausaInstruccionDemoMs: Long = 1_500,
     /** Mínimo de útiles que se muestra como objetivo en la demostración (el de las reglas 1 y 2). */
-    val objetivoDemostracion: Int = 45,
+    val objetivoDemostracion: Int = 45
 ) {
     fun objetivo(tipo: TipoRegimen): Int = objetivoUtiles.getValue(tipo)
     fun piso(tipo: TipoRegimen): Double = pisoSeg.getValue(tipo)

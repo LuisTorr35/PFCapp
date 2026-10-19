@@ -26,13 +26,12 @@ import org.junit.Test
 class ProtocoloELM327Test {
 
     /** Adaptador con tiempo virtual: los retardos y tiempos límite no esperan de verdad. */
-    private fun TestScope.adaptador(fabrica: () -> TransporteSerie): AdaptadorELM327Bluetooth =
-        AdaptadorELM327Bluetooth(
-            fabricaTransporte = fabrica,
-            direccionMac = "00:1D:A5:68:98:8B",
-            despachador = StandardTestDispatcher(testScheduler),
-            reloj = { testScheduler.currentTime },
-        )
+    private fun TestScope.adaptador(fabrica: () -> TransporteSerie): AdaptadorELM327Bluetooth = AdaptadorELM327Bluetooth(
+        fabricaTransporte = fabrica,
+        direccionMac = "00:1D:A5:68:98:8B",
+        despachador = StandardTestDispatcher(testScheduler),
+        reloj = { testScheduler.currentTime }
+    )
 
     // Inicio ------------------------------------------------------------------
 
@@ -64,7 +63,7 @@ class ProtocoloELM327Test {
             "SEARCHING...\rUNABLE TO CONNECT",
             "STOPPED",
             "SEARCHING...\r7E8 06 41 00 BE 3F A8 13 00",
-            elm.trama("41 00 BE 3F A8 13"),
+            elm.trama("41 00 BE 3F A8 13")
         )
         val t = TransporteFalso(elm)
         val r = adaptador { t }.conectar()
@@ -199,7 +198,7 @@ class ProtocoloELM327Test {
             numeroProtocolo = "3",
             nombreProtocolo = "ISO 9141-2",
             cabecera = "48 6B 11",
-            modoUno = mutableMapOf(0x0C to "0C 80", 0x0B to "4D", 0x05 to "5B", 0x06 to "80", 0x07 to "80", 0x0E to "98", 0x04 to "05"),
+            modoUno = mutableMapOf(0x0C to "0C 80", 0x0B to "4D", 0x05 to "5B", 0x06 to "80", 0x07 to "80", 0x0E to "98", 0x04 to "05")
         )
         // el automático no engancha; con ATSP3 la primera inicialización del bus falla y la segunda sí
         elm.responder0100("0", "SEARCHING...\rUNABLE TO CONNECT")
@@ -339,4 +338,3 @@ class ProtocoloELM327Test {
         assertEquals(EstadoEnlace.DESCONECTADO, a.estadoEnlace.value)
     }
 }
-

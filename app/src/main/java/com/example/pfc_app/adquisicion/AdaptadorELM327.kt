@@ -12,7 +12,7 @@ enum class EstadoEnlace(val texto: String) {
     DESCONECTADO("Desconectado"),
     CONECTANDO("Conectando"),
     CONECTADO("Conectado"),
-    RECONECTANDO("Reconectando"),
+    RECONECTANDO("Reconectando")
 }
 
 data class ResultadoConexion(
@@ -22,7 +22,7 @@ data class ResultadoConexion(
     /** Familia de gestión según los PID que contestan (MAF 0x10, MAP 0x0B). */
     val familiaGestion: FamiliaGestion? = null,
     /** Motivo legible si no se pudo conectar (CU-02, excepciones de los pasos 1 y 4). */
-    val mensajeError: String? = null,
+    val mensajeError: String? = null
 )
 
 /**

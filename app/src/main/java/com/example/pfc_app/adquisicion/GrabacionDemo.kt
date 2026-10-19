@@ -23,7 +23,7 @@ data class GrabacionDemo(
     /** Qué muestra esta grabación, por ejemplo "con R1 en frío" o "sin diagnóstico (regla 8)". */
     val nota: String = "",
     /** true si la grabación trae R1 (el vehículo llegó frío). */
-    val tieneR1: Boolean = false,
+    val tieneR1: Boolean = false
 )
 
 interface CatalogoDemo {
@@ -54,7 +54,7 @@ class CatalogoDemoArchivos(private val fuente: FuenteArchivos) : CatalogoDemo {
                 familiaGestion = FamiliaGestion.desdeTexto(g.optString("familia_gestion").takeIf { it.isNotEmpty() }),
                 claseConfirmada = g.optString("clase_confirmada").takeIf { it.isNotEmpty() },
                 nota = g.optString("nota"),
-                tieneR1 = g.optBoolean("tiene_r1", false),
+                tieneR1 = g.optBoolean("tiene_r1", false)
             )
         }
     }

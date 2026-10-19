@@ -15,7 +15,7 @@ data class ContratoModelo(
     val caracteristicas: List<CaracteristicaModelo>,
     val regimenesRequeridos: List<TipoRegimen>,
     /** Columnas de la tabla lectura que el modelo necesita: rpm, carga_calculada, stft, ltft, avance_encendido. */
-    val columnasLecturaRequeridas: List<String>,
+    val columnasLecturaRequeridas: List<String>
 ) {
     val nombresCaracteristicas: List<String> get() = caracteristicas.map { it.nombre }
 
@@ -34,7 +34,7 @@ data class CaracteristicaModelo(
     val regimen: TipoRegimen,
     val columnaLectura: String,
     val estadistico: String,
-    val referencia: ReferenciaSinFalla,
+    val referencia: ReferenciaSinFalla
 )
 
 /** Valores de referencia sin falla, calculados con las atenciones C0 del entrenamiento. */
@@ -44,5 +44,5 @@ data class ReferenciaSinFalla(
     val q3: Double,
     val desv: Double,
     val limiteInferior: Double,
-    val limiteSuperior: Double,
+    val limiteSuperior: Double
 )

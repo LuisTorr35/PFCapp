@@ -12,11 +12,8 @@ import com.example.pfc_app.procesamiento.ReglaMuestras
  * las muestras sobre 1100 rpm). El conteo se rehace desde las lecturas, no se
  * toma de los campos precalculados del régimen.
  */
-class ReglaMuestrasUtiles(
-    override val numero: Int,
-    private val tipo: TipoRegimen,
-    private val minimo: Int = ReglaMuestras.MINIMO_UTILES,
-) : ReglaBase() {
+class ReglaMuestrasUtiles(override val numero: Int, private val tipo: TipoRegimen, private val minimo: Int = ReglaMuestras.MINIMO_UTILES) :
+    ReglaBase() {
     override val nivel = NivelRegla.OBLIGATORIA
 
     override val descripcion: String =
@@ -31,8 +28,11 @@ class ReglaMuestrasUtiles(
         val r = atencion.regimen(tipo)
             ?: return rechaza("$tipo no capturado: hay que capturar ${tipo.nombre.lowercase()}", tipo)
         val utiles = ReglaMuestras.contarUtiles(tipo, r.lecturas)
-        return if (utiles >= minimo) cumple(regimen = tipo)
-        else rechaza("$tipo no reunió las $minimo muestras útiles ($utiles de $minimo)", tipo)
+        return if (utiles >= minimo) {
+            cumple(regimen = tipo)
+        } else {
+            rechaza("$tipo no reunió las $minimo muestras útiles ($utiles de $minimo)", tipo)
+        }
     }
 
     companion object {

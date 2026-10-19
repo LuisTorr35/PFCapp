@@ -1,10 +1,10 @@
 package com.example.pfc_app.procesamiento
 
 import com.example.pfc_app.Recursos
+import kotlin.math.abs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.math.abs
 
 /**
  * RF-05: la fila que calcula la aplicación es la misma que calcula
@@ -35,11 +35,14 @@ class EquivalenciaConsolidadorTest {
                 val v = fila[c]
                 when {
                     e == null && v == null -> Unit
+
                     e == null || v == null -> {
                         noIdenticas += "$id $c: app=$v consolidador=$e"
                         fuera += "$id $c: app=$v consolidador=$e (vacío en un lado)"
                     }
+
                     e.toDouble() == v.toDouble() -> Unit
+
                     else -> {
                         noIdenticas += "$id $c: app=$v consolidador=$e (dif ${abs(v - e)})"
                         if (abs(v - e) > 1e-4 + 1e-12) fuera += "$id $c: app=$v consolidador=$e"

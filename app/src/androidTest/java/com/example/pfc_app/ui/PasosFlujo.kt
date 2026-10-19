@@ -71,7 +71,7 @@ class PasosFlujo(private val compose: AndroidComposeTestRule<*, *>) {
         esperar(tiempoMs, "dictamen completa o parcial") {
             existe(
                 hasTestTag(E.TARJETA_DICTAMEN) and
-                    (hasText("Dictamen: completa", substring = true) or hasText("Dictamen: parcial", substring = true)),
+                    (hasText("Dictamen: completa", substring = true) or hasText("Dictamen: parcial", substring = true))
             )
         }
     }
@@ -130,12 +130,10 @@ class PasosFlujo(private val compose: AndroidComposeTestRule<*, *>) {
     fun existe(matcher: SemanticsMatcher): Boolean =
         compose.onAllNodes(matcher).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
 
-    fun cuenta(tag: String): Int =
-        compose.onAllNodesWithTag(tag).fetchSemanticsNodes(atLeastOneRootRequired = false).size
+    fun cuenta(tag: String): Int = compose.onAllNodesWithTag(tag).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 
-    fun texto(tag: String): String =
-        compose.onNodeWithTag(tag).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)
-            ?.joinToString("") { it.text }.orEmpty()
+    fun texto(tag: String): String = compose.onNodeWithTag(tag).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)
+        ?.joinToString("") { it.text }.orEmpty()
 
     /**
      * Espera a que se cumpla [condicion]. Mientras tanto pulsa "Continuar" si la captura lo

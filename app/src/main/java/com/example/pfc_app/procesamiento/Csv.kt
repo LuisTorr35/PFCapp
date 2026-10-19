@@ -23,7 +23,7 @@ class TablaCsv(val encabezados: List<String>, val filas: List<List<String>>) {
  */
 object Csv {
     fun leer(texto: String): TablaCsv {
-        val limpio = texto.removePrefix("﻿")
+        val limpio = texto.removePrefix("\uFEFF")
         val separador = detectarSeparador(limpio)
         val registros = registros(limpio, separador).filter { r -> r.any { it.isNotBlank() } }
         if (registros.isEmpty()) return TablaCsv(emptyList(), emptyList())
@@ -36,8 +36,11 @@ object Csv {
         var enComillas = false
         val cuenta = mutableMapOf(',' to 0, ';' to 0, '\t' to 0)
         for (c in primera) {
-            if (c == '"') enComillas = !enComillas
-            else if (!enComillas && c in cuenta) cuenta[c] = cuenta.getValue(c) + 1
+            if (c == '"') {
+                enComillas = !enComillas
+            } else if (!enComillas && c in cuenta) {
+                cuenta[c] = cuenta.getValue(c) + 1
+            }
         }
         return cuenta.maxByOrNull { it.value }?.takeIf { it.value > 0 }?.key ?: ','
     }
@@ -64,17 +67,21 @@ object Csv {
             } else {
                 when (c) {
                     '"' -> enComillas = true
+
                     sep -> {
                         campos.add(campo.toString())
                         campo.setLength(0)
                     }
+
                     '\r' -> Unit
+
                     '\n' -> {
                         campos.add(campo.toString())
                         campo.setLength(0)
                         salida.add(campos)
                         campos = ArrayList()
                     }
+
                     else -> campo.append(c)
                 }
             }

@@ -64,7 +64,7 @@ fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
                 alAbrirHistorial = { v ->
                     Registro.i(Registro.UI, "→ Historial de ${v.codigo}")
                     navController.navigate(Rutas.historial(v.id)) { launchSingleTop = true }
-                },
+                }
             )
         }
 
@@ -72,16 +72,23 @@ fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
             route = Rutas.CAPTURA,
             arguments = listOf(
                 navArgument("idVehiculo") { type = NavType.LongType },
-                navArgument("grabacion") { type = NavType.StringType; nullable = true; defaultValue = null },
-                navArgument("rechazo") { type = NavType.BoolType; defaultValue = false },
-            ),
+                navArgument("grabacion") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("rechazo") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
         ) { entrada ->
             val args = entrada.arguments
             val idVehiculo = args?.getLong("idVehiculo") ?: 0L
             val grabacion = args?.getString("grabacion")?.takeIf { it.isNotBlank() }
             val rechazo = args?.getBoolean("rechazo") ?: false
             val vm: CapturaViewModel = viewModel(
-                factory = fabricaDe { CapturaViewModel(contenedor, idVehiculo, grabacion, rechazo) },
+                factory = fabricaDe { CapturaViewModel(contenedor, idVehiculo, grabacion, rechazo) }
             )
             PantallaCaptura(
                 vm = vm,
@@ -90,20 +97,25 @@ fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
                     Registro.i(Registro.UI, "→ Diagnóstico de la atención en curso")
                     navController.navigate(Rutas.diagnosticoEnCurso()) { launchSingleTop = true }
                 },
-                alAbrirHistorial = ::historialTrasGuardar,
+                alAbrirHistorial = ::historialTrasGuardar
             )
         }
 
         composable(
             route = Rutas.DIAGNOSTICO,
-            arguments = listOf(navArgument("idAtencion") { type = NavType.LongType; defaultValue = -1L }),
+            arguments = listOf(
+                navArgument("idAtencion") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
         ) { entrada ->
             val id = entrada.arguments?.getLong("idAtencion")?.takeIf { it > 0 }
             val vm: DiagnosticoViewModel = viewModel(factory = fabricaDe { DiagnosticoViewModel(contenedor, id) })
             PantallaDiagnostico(
                 vm = vm,
                 alVolver = ::volver,
-                alAbrirHistorial = { idVehiculo -> historialTrasGuardar(idVehiculo, CapturaViewModel.AVISO_GUARDADA) },
+                alAbrirHistorial = { idVehiculo -> historialTrasGuardar(idVehiculo, CapturaViewModel.AVISO_GUARDADA) }
             )
         }
 
@@ -111,8 +123,12 @@ fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
             route = Rutas.HISTORIAL,
             arguments = listOf(
                 navArgument("idVehiculo") { type = NavType.LongType },
-                navArgument("aviso") { type = NavType.StringType; nullable = true; defaultValue = null },
-            ),
+                navArgument("aviso") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { entrada ->
             val idVehiculo = entrada.arguments?.getLong("idVehiculo") ?: 0L
             val aviso = entrada.arguments?.getString("aviso")
@@ -124,7 +140,7 @@ fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
                 alAbrirAtencion = { idAtencion ->
                     Registro.i(Registro.UI, "→ Diagnóstico de la atención guardada $idAtencion")
                     navController.navigate(Rutas.diagnosticoGuardado(idAtencion)) { launchSingleTop = true }
-                },
+                }
             )
         }
     }

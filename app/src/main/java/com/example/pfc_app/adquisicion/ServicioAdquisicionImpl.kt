@@ -9,6 +9,9 @@ import com.example.pfc_app.modelos.Vehiculo
 import com.example.pfc_app.procesamiento.ProcesadorCaracteristicas
 import com.example.pfc_app.procesamiento.Redondeo
 import com.example.pfc_app.procesamiento.ReglaMuestras
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.coroutineScope
@@ -19,9 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /** La captura no pudo seguir; [message] es legible para el mecánico. */
 class ErrorCaptura(mensaje: String, causa: Throwable? = null) : Exception(mensaje, causa)
@@ -39,7 +39,7 @@ class ErrorCaptura(mensaje: String, causa: Throwable? = null) : Exception(mensaj
 class ServicioAdquisicionImpl(
     private val procesador: ProcesadorCaracteristicas = ProcesadorCaracteristicas(),
     private val config: ConfiguracionCaptura = ConfiguracionCaptura(),
-    private val reloj: () -> Long = { System.currentTimeMillis() },
+    private val reloj: () -> Long = { System.currentTimeMillis() }
 ) : ServicioAdquisicion {
 
     private val _estado = MutableStateFlow(EstadoCaptura())
@@ -63,7 +63,7 @@ class ServicioAdquisicionImpl(
         Registro.i(
             Registro.CAPTURA,
             "CU-03: atención de ${vehiculo.codigo} (${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio})" +
-                if (adaptador.esDemostracion) " en modo demostración" else "",
+                if (adaptador.esDemostracion) " en modo demostración" else ""
         )
         return conVigiaDelEnlace(adaptador) { ejecutarAtencion(vehiculo, adaptador) }
     }
@@ -78,7 +78,7 @@ class ServicioAdquisicionImpl(
                 terminada = false,
                 error = null,
                 mensaje = null,
-                regimenes = it.regimenes + (tipo to ProgresoRegimen(tipo, objetivo = objetivoMostrado(tipo))),
+                regimenes = it.regimenes + (tipo to ProgresoRegimen(tipo, objetivo = objetivoMostrado(tipo)))
             )
         }
         return conVigiaDelEnlace(ad) {
@@ -128,7 +128,7 @@ class ServicioAdquisicionImpl(
             it.copy(
                 protocolo = conexion.protocolo,
                 familiaGestion = conexion.familiaGestion,
-                instruccion = "Lectura inicial: códigos de diagnóstico y contadores del modo 06",
+                instruccion = "Lectura inicial: códigos de diagnóstico y contadores del modo 06"
             )
         }
 
@@ -146,7 +146,7 @@ class ServicioAdquisicionImpl(
             Registro.CAPTURA,
             "Lectura inicial: ${codigos.size} códigos, ${modo06.size} cilindros en modo 06, barométrica " +
                 (if (baro != null) "$baro kPa (PID 0x33)" else "$mapContacto kPa (MAP con el motor apagado)") + ", " +
-                "refrigerante $ectInicial °C",
+                "refrigerante $ectInicial °C"
         )
         atencionActual = Atencion(
             idVehiculo = vehiculo.id,
@@ -155,7 +155,7 @@ class ServicioAdquisicionImpl(
             mapContactoKpa = mapContacto,
             protocolo = conexion.protocolo,
             codigos = codigos,
-            contadoresModo06 = modo06,
+            contadoresModo06 = modo06
         )
 
         // paso 4: arranque
@@ -166,8 +166,11 @@ class ServicioAdquisicionImpl(
         if (ect != null && ect < config.ectTopeR1) {
             capturarRegimen(TipoRegimen.R1, ad)
         } else {
-            val motivo = if (ect == null) "sin lectura de refrigerante: no se puede saber si el motor está frío"
-            else "el motor llegó caliente (${Redondeo.python(ect, 1)} °C)"
+            val motivo = if (ect == null) {
+                "sin lectura de refrigerante: no se puede saber si el motor está frío"
+            } else {
+                "el motor llegó caliente (${Redondeo.python(ect, 1)} °C)"
+            }
             Registro.i(Registro.CAPTURA, "R1 omitido: $motivo")
             progreso(TipoRegimen.R1) { it.copy(estado = EstadoRegimen.OMITIDO, motivoOmision = motivo, ect = ect) }
         }
@@ -186,7 +189,7 @@ class ServicioAdquisicionImpl(
             Registro.CAPTURA,
             "Atención capturada: " + at.regimenes.values.joinToString {
                 "${it.tipo} ${it.lecturas.size} filas, ${it.muestrasUtiles} útiles, ${"%.2f".format(it.frecuenciaHz)} Hz"
-            },
+            }
         )
         return at
     }
@@ -195,16 +198,21 @@ class ServicioAdquisicionImpl(
     private suspend fun prepararRegimen(tipo: TipoRegimen, ad: AdaptadorELM327) {
         when (tipo) {
             TipoRegimen.R1 -> instruir("Motor recién arrancado, en frío y en ralentí, sin acelerar")
+
             TipoRegimen.R2 -> {
                 if (!demo) esperarCalentamiento(ad)
-                if (demo) instruir("Ralentí caliente: motor estabilizado, sin acelerar ni encender el aire acondicionado")
-                else _estado.update {
-                    it.copy(instruccion = "Ralentí caliente: no acelere ni encienda el aire acondicionado", esperaConfirmacion = false)
+                if (demo) {
+                    instruir("Ralentí caliente: motor estabilizado, sin acelerar ni encender el aire acondicionado")
+                } else {
+                    _estado.update {
+                        it.copy(instruccion = "Ralentí caliente: no acelere ni encienda el aire acondicionado", esperaConfirmacion = false)
+                    }
                 }
             }
+
             TipoRegimen.R3 -> instruir(
                 "Haga tres subidas de 800 a 3000 rpm en neutro y vuelva al ralentí, cada subida de unos 8 segundos, " +
-                    "sin pisar a fondo",
+                    "sin pisar a fondo"
             )
         }
     }
@@ -269,14 +277,14 @@ class ServicioAdquisicionImpl(
                 estado = EstadoRegimen.CAPTURADO,
                 muestrasUtiles = regimen.muestrasUtiles,
                 rpm = lecturas.last().rpm,
-                ect = lecturas.last().tempRefrigerante,
+                ect = lecturas.last().tempRefrigerante
             )
         }
         Registro.i(
             Registro.CAPTURA,
             "$tipo capturado: ${lecturas.size} filas, ${regimen.muestrasUtiles} útiles, " +
                 "${regimen.descartadasTransitorio} por transitorio, ${regimen.descartadasTecho} por techo, " +
-                "${"%.2f".format(regimen.frecuenciaHz)} Hz",
+                "${"%.2f".format(regimen.frecuenciaHz)} Hz"
         )
     }
 
@@ -306,14 +314,16 @@ class ServicioAdquisicionImpl(
                 it.copy(
                     instruccion = "Motor en ralentí calentando: refrigerante ${ect?.let { e -> Redondeo.python(e, 1) } ?: "--"} °C. " +
                         "R2 empieza al superar ${config.ectR2.toInt()} °C (${transcurrido / 60}:${"%02d".format(transcurrido % 60)})",
-                    esperaConfirmacion = false,
+                    esperaConfirmacion = false
                 )
             }
             delay(config.consultaCalentamientoMs)
         }
         Registro.w(Registro.CAPTURA, "El refrigerante no superó ${config.ectR2} °C en ${config.esperaCalentamientoMaxMin} min")
         _estado.update {
-            it.copy(mensaje = "El motor no llegó a la temperatura de trabajo en ${config.esperaCalentamientoMaxMin} min; se captura R2 igual")
+            it.copy(
+                mensaje = "El motor no llegó a la temperatura de trabajo en ${config.esperaCalentamientoMaxMin} min; se captura R2 igual"
+            )
         }
     }
 
@@ -375,7 +385,7 @@ class ServicioAdquisicionImpl(
                             e == EstadoEnlace.RECONECTANDO -> MENSAJE_RECONECTANDO
                             s.mensaje == MENSAJE_RECONECTANDO && e == EstadoEnlace.CONECTADO -> "Enlace restablecido"
                             else -> s.mensaje
-                        },
+                        }
                     )
                 }
             }
@@ -401,6 +411,7 @@ class ServicioAdquisicionImpl(
         private var pausa = 0.0
         private var anterior: Double? = null
         private var avisoRampas = false
+
         /** Última rpm leída: R3 no corta mientras siga por encima del ralentí (en_rampa). */
         private var ultimoRpm: Double? = null
         var motivo: String? = null
@@ -425,9 +436,12 @@ class ServicioAdquisicionImpl(
             val objetivo = config.objetivo(tipo)
             when {
                 t >= config.techo(tipo) + config.techoAbsolutoExtraSeg -> motivo = "techo absoluto por cortes del enlace"
+
                 tEf >= config.techo(tipo) -> motivo = "techo de tiempo"
+
                 tipo == TipoRegimen.R1 && (l.tempRefrigerante ?: 0.0) >= config.ectTopeR1 ->
                     motivo = "refrigerante llegó a ${l.tempRefrigerante} °C"
+
                 tEf >= config.piso(tipo) && utiles >= objetivo &&
                     !(tipo == TipoRegimen.R3 && (ultimoRpm ?: 0.0) > ReglaMuestras.TECHO_RALENTI_RPM) ->
                     motivo = "conteo de muestras útiles"

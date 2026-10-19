@@ -12,7 +12,7 @@ enum class EstadoRegimen(val texto: String) {
     PENDIENTE("Pendiente"),
     CAPTURANDO("Capturando"),
     CAPTURADO("Capturado"),
-    OMITIDO("No capturado"),
+    OMITIDO("No capturado")
 }
 
 data class ProgresoRegimen(
@@ -23,7 +23,7 @@ data class ProgresoRegimen(
     val rpm: Double? = null,
     val ect: Double? = null,
     /** Por qué no se capturó, por ejemplo "el motor llegó caliente" en R1. */
-    val motivoOmision: String? = null,
+    val motivoOmision: String? = null
 )
 
 /** Lo que la pantalla de Captura muestra mientras avanza la atención. */
@@ -47,7 +47,7 @@ data class EstadoCaptura(
     /** Error que detuvo la captura (CU-03, excepción del paso 2). */
     val error: String? = null,
     /** La captura de todos los regímenes terminó. */
-    val terminada: Boolean = false,
+    val terminada: Boolean = false
 )
 
 /**

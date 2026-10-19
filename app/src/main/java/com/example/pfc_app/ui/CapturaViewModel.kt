@@ -31,13 +31,14 @@ enum class FaseCaptura {
     PREPARANDO,
     CAPTURANDO,
     VALIDANDO,
+
     /** Hay dictamen y la pantalla espera al mecánico (Diagnosticar, Repetir o Guardar sin diagnóstico). */
     LISTA,
     REPITIENDO,
     DIAGNOSTICANDO,
     GUARDANDO,
     GUARDADA,
-    ERROR,
+    ERROR
 }
 
 data class EstadoPantallaCaptura(
@@ -58,7 +59,7 @@ data class EstadoPantallaCaptura(
     /** Error que detuvo la atención (no se pudo conectar, por ejemplo). */
     val error: String? = null,
     /** Aviso que no detiene la atención (falló una repetición o el diagnóstico). */
-    val aviso: String? = null,
+    val aviso: String? = null
 ) {
     /**
      * "Diagnosticar" se habilita con dictamen completa o parcial. Si el vehículo no expone
@@ -89,7 +90,7 @@ class CapturaViewModel(
     private val contenedor: AppContenedor,
     private val idVehiculo: Long,
     private val idGrabacion: String?,
-    private val simularRechazo: Boolean,
+    private val simularRechazo: Boolean
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow(EstadoPantallaCaptura(modoDemostracion = idGrabacion != null))
@@ -168,14 +169,14 @@ class CapturaViewModel(
         Registro.i(
             Registro.UI,
             "Dictamen ${dictamen.resultado.texto}; repetir ${dictamen.regimenesARepetir}; " +
-                "faltan parámetros del modelo: ${dictamen.faltanParametrosModelo}",
+                "faltan parámetros del modelo: ${dictamen.faltanParametrosModelo}"
         )
         _estado.update {
             it.copy(
                 fase = FaseCaptura.LISTA,
                 dictamen = dictamen,
                 regimenesCapturados = a.regimenes.keys,
-                sinDiagnostico = dictamen.faltanParametrosModelo,
+                sinDiagnostico = dictamen.faltanParametrosModelo
             )
         }
     }
@@ -200,8 +201,10 @@ class CapturaViewModel(
                 Registro.e(Registro.UI, "Falló la repetición de $tipo", t)
                 _estado.update {
                     it.copy(
-                        fase = FaseCaptura.LISTA, dictamen = anterior.dictamen, regimenEnRepeticion = null,
-                        aviso = "No se pudo repetir $tipo: ${t.mensajeLegible()}",
+                        fase = FaseCaptura.LISTA,
+                        dictamen = anterior.dictamen,
+                        regimenEnRepeticion = null,
+                        aviso = "No se pudo repetir $tipo: ${t.mensajeLegible()}"
                     )
                 }
             }) {
@@ -234,7 +237,10 @@ class CapturaViewModel(
                 val inicio = System.currentTimeMillis()
                 // ProcesadorCaracteristicas().prepararFila + MotorInferencia(modelo).predecir
                 val diagnostico = withContext(Dispatchers.Default) { contenedor.diagnosticarAtencion(a) }
-                Registro.i(Registro.UI, "Inferencia en ${System.currentTimeMillis() - inicio} ms: ${diagnostico?.clase ?: "sin diagnóstico"}")
+                Registro.i(
+                    Registro.UI,
+                    "Inferencia en ${System.currentTimeMillis() - inicio} ms: ${diagnostico?.clase ?: "sin diagnóstico"}"
+                )
                 if (diagnostico == null) {
                     // A la fila le falta alguna característica: se trata como la regla 8 (CU-05 E1).
                     guardarSinDiagnostico(a, d, v)

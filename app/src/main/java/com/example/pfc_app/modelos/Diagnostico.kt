@@ -22,8 +22,7 @@ enum class Direccion(val texto: String, val flecha: String) {
     MENOR("menor", "↓");
 
     companion object {
-        fun desdeTexto(texto: String?): Direccion? =
-            entries.firstOrNull { it.texto.equals(texto, ignoreCase = true) }
+        fun desdeTexto(texto: String?): Direccion? = entries.firstOrNull { it.texto.equals(texto, ignoreCase = true) }
     }
 }
 
@@ -35,7 +34,7 @@ data class ParametroDesviado(
     val direccion: Direccion,
     /** Etiqueta para el mecánico y unidad, tomadas del contrato del modelo. */
     val etiqueta: String = parametro,
-    val unidad: String = "",
+    val unidad: String = ""
 )
 
 /** Resultado del modelo sobre una atención (RF-07). */
@@ -48,5 +47,5 @@ data class Diagnostico(
     val probabilidades: Map<String, Double> = emptyMap(),
     val parametrosDesviados: List<ParametroDesviado> = emptyList(),
     val codigosLeidos: List<CodigoDTC> = emptyList(),
-    val modeloProvisional: Boolean = true,
+    val modeloProvisional: Boolean = true
 )

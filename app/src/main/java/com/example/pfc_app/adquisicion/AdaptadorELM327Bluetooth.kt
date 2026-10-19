@@ -9,6 +9,7 @@ import com.example.pfc_app.modelos.Lectura
 import com.example.pfc_app.modelos.TipoDTC
 import com.example.pfc_app.modelos.TipoRegimen
 import com.example.pfc_app.procesamiento.Redondeo
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
 /** Ajustes del adaptador real, con los valores de registrar_obd.py v4. */
 data class AjustesAdaptador(
@@ -37,7 +37,7 @@ data class AjustesAdaptador(
     val lecturasSinRpm: Int = 2,
     /** Consultar el anillo lento cada [PidOBD.CADA_LENTOS] muestras, para conservar la tasa del entrenamiento. */
     val anilloLento: Boolean = true,
-    val tiempos: TiemposELM327 = TiemposELM327(),
+    val tiempos: TiemposELM327 = TiemposELM327()
 )
 
 /** Lo que el sondeo inicial averiguó del vehículo. */
@@ -52,7 +52,7 @@ private class Sondeo(
     var velocidad: Double? = null,
     /** MAP leída con el motor apagado: respaldo de la barométrica. */
     var mapMotorApagado: Double? = null,
-    var resondeado: Boolean = false,
+    var resondeado: Boolean = false
 )
 
 /**
@@ -71,12 +71,12 @@ class AdaptadorELM327Bluetooth(
     val direccionMac: String,
     private val despachador: CoroutineDispatcher = Dispatchers.IO,
     private val ajustes: AjustesAdaptador = AjustesAdaptador(),
-    private val reloj: () -> Long = { System.currentTimeMillis() },
+    private val reloj: () -> Long = { System.currentTimeMillis() }
 ) : AdaptadorELM327 {
 
     constructor(contexto: Context, direccionMac: String) : this(
         fabricaTransporte = { TransporteBluetooth(contexto.applicationContext, direccionMac) },
-        direccionMac = direccionMac,
+        direccionMac = direccionMac
     )
 
     override val esDemostracion: Boolean = false
@@ -145,7 +145,7 @@ class AdaptadorELM327Bluetooth(
     /** Modo 06, MID A2 a A9 (cilindros 1 a 8). Solo en CAN; en línea K el formato es otro y se devuelve vacío. */
     override suspend fun leerContadoresModo06(): List<ContadorModo06> = conReconexion("leer modo 06") { c ->
         if (!c.formato.esCan) {
-            Registro.i(Registro.BT, "Modo 06 no se lee en línea K (${nombreProtocolo})")
+            Registro.i(Registro.BT, "Modo 06 no se lee en línea K ($nombreProtocolo)")
             return@conReconexion emptyList()
         }
         if (!c.vivo()) throw EnlaceCaidoException("La unidad de control no contesta 0100")
@@ -159,7 +159,13 @@ class AdaptadorELM327Bluetooth(
         }
         Registro.i(
             Registro.BT,
-            "Modo 06: ${if (salida.isEmpty()) "sin contadores" else salida.joinToString { "cil ${it.cilindro} actual ${it.conteoActual} promedio ${it.conteoPromedio}" }}",
+            "Modo 06: ${if (salida.isEmpty()) {
+                "sin contadores"
+            } else {
+                salida.joinToString {
+                    "cil ${it.cilindro} actual ${it.conteoActual} promedio ${it.conteoPromedio}"
+                }
+            }}"
         )
         salida
     }
@@ -210,7 +216,7 @@ class AdaptadorELM327Bluetooth(
         Registro.i(
             Registro.BT,
             "$regimen: ${sondeo.rapidos.size} PID por muestra (${sondeo.rapidos.joinToString { it.nombre }}), " +
-                "${sondeo.lentos.size} lentos cada ${PidOBD.CADA_LENTOS}",
+                "${sondeo.lentos.size} lentos cada ${PidOBD.CADA_LENTOS}"
         )
         val t0 = reloj()
         var nCiclo = 0
@@ -263,8 +269,8 @@ class AdaptadorELM327Bluetooth(
                     avanceEncendido = valores[CampoLectura.AVANCE],
                     maf = valores[CampoLectura.MAF],
                     map = valores[CampoLectura.MAP],
-                    velocidad = sondeo.velocidad,
-                ),
+                    velocidad = sondeo.velocidad
+                )
             )
             val resto = ajustes.periodoMs - (reloj() - inicioCiclo)
             if (resto > 0) delay(resto)
@@ -336,28 +342,27 @@ class AdaptadorELM327Bluetooth(
      * Ejecuta una lectura suelta; ante excepción, -1 o tiempo agotado reconecta y la
      * repite (hasta 3 veces, como Enlace.query de registrar_obd.py).
      */
-    private suspend fun <T> conReconexion(que: String, bloque: suspend (ClienteELM327) -> T): T =
-        withContext(despachador) {
-            var ultimo: Exception? = null
-            for (intento in 1..3) {
-                try {
-                    return@withContext candado.withLock {
-                        val c = cliente ?: run {
-                            if (!reconectarSinCandado()) throw EnlaceCaidoException("Sin enlace con el adaptador")
-                            cliente!!
-                        }
-                        bloque(c)
+    private suspend fun <T> conReconexion(que: String, bloque: suspend (ClienteELM327) -> T): T = withContext(despachador) {
+        var ultimo: Exception? = null
+        for (intento in 1..3) {
+            try {
+                return@withContext candado.withLock {
+                    val c = cliente ?: run {
+                        if (!reconectarSinCandado()) throw EnlaceCaidoException("Sin enlace con el adaptador")
+                        cliente!!
                     }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: IOException) {
-                    ultimo = e
-                    Registro.w(Registro.BT, "Falló $que (intento $intento): ${e.message}")
-                    if (!reconectar()) break
+                    bloque(c)
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                ultimo = e
+                Registro.w(Registro.BT, "Falló $que (intento $intento): ${e.message}")
+                if (!reconectar()) break
             }
-            throw EnlaceCaidoException("No se pudo $que: se perdió el enlace con el adaptador", ultimo)
         }
+        throw EnlaceCaidoException("No se pudo $que: se perdió el enlace con el adaptador", ultimo)
+    }
 
     /** Sondeo de cada PID con una consulta real, sin creerle a la máscara de soportados. */
     private suspend fun sondear(momento: String) {
@@ -384,13 +389,13 @@ class AdaptadorELM327Bluetooth(
         sondeo = s
         familiaGestion = FamiliaGestion.desdeSensores(
             tieneMaf = PidOBD.MAF in s.rapidos,
-            tieneMap = PidOBD.INTAKE_PRESSURE in s.rapidos,
+            tieneMap = PidOBD.INTAKE_PRESSURE in s.rapidos
         )
         Registro.i(
             Registro.BT,
             "Sondeo ($momento): contestan ${s.rapidos.joinToString { it.nombre }}; " +
                 "sin lectura ${s.faltantes.joinToString { it.first().canonico }}; lentos ${s.lentos.joinToString { it.nombre }}; " +
-                "barométrica ${s.baro}, velocidad ${s.velocidad}, MAP en reposo ${s.mapMotorApagado}",
+                "barométrica ${s.baro}, velocidad ${s.velocidad}, MAP en reposo ${s.mapMotorApagado}"
         )
     }
 
@@ -423,7 +428,7 @@ class AdaptadorELM327Bluetooth(
         Registro.i(
             Registro.BT,
             "Re-sondeo con el motor encendido: " +
-                if (recuperados.isEmpty()) "ninguno más contestó" else "recuperados ${recuperados.joinToString { it.nombre }}",
+                if (recuperados.isEmpty()) "ninguno más contestó" else "recuperados ${recuperados.joinToString { it.nombre }}"
         )
     }
 
@@ -440,8 +445,10 @@ class AdaptadorELM327Bluetooth(
     private fun mensajeLegible(e: Exception): String = when (e) {
         is PermisoBluetoothException, is AdaptadorNoEncontradoException, is VehiculoNoRespondeException ->
             e.message ?: "No se pudo conectar"
+
         is EnlaceCaidoException ->
             "Se perdió el enlace con el adaptador durante la conexión. Revise que esté bien enchufado y vuelva a intentar."
+
         else -> "No se pudo conectar con el adaptador: ${e.message}"
     }
 }

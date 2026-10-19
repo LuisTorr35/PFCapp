@@ -29,7 +29,7 @@ class AdaptadorELM327Demo(
     private val fuente: FuenteArchivos,
     val grabacion: GrabacionDemo,
     private val simularRechazo: Boolean = false,
-    private val aceleracion: Double = 20.0,
+    private val aceleracion: Double = 20.0
 ) : AdaptadorELM327 {
 
     /** Constructor del teléfono: los archivos están en assets/demo/<id>/. */
@@ -37,12 +37,12 @@ class AdaptadorELM327Demo(
         contexto: Context,
         grabacion: GrabacionDemo,
         simularRechazo: Boolean = false,
-        aceleracion: Double = 20.0,
+        aceleracion: Double = 20.0
     ) : this(
         FuenteArchivosAssets(contexto.applicationContext, "${CatalogoDemoAssets.CARPETA}/${grabacion.id}"),
         grabacion,
         simularRechazo,
-        aceleracion,
+        aceleracion
     )
 
     override val esDemostracion: Boolean = true
@@ -76,7 +76,7 @@ class AdaptadorELM327Demo(
         Registro.i(
             Registro.CAPTURA,
             "Demostración ${grabacion.id} conectada: protocolo $protocolo, familia ${familia?.texto}, " +
-                "regímenes ${lecturas.keys.joinToString()}" + if (simularRechazo) ", simula el rechazo de R2" else "",
+                "regímenes ${lecturas.keys.joinToString()}" + if (simularRechazo) ", simula el rechazo de R2" else ""
         )
         return ResultadoConexion(exito = true, protocolo = protocolo, familiaGestion = familia)
     }
@@ -112,7 +112,7 @@ class AdaptadorELM327Demo(
         Registro.i(
             Registro.CAPTURA,
             "Demostración ${grabacion.id}: reproduciendo $regimen, ${filas.size} filas a ${aceleracion}x" +
-                if (cortar) ", cortado a $UTILES_CON_RECHAZO útiles para simular el rechazo" else "",
+                if (cortar) ", cortado a $UTILES_CON_RECHAZO útiles para simular el rechazo" else ""
         )
         val t0 = filas.firstOrNull { !it.instante.isNaN() }?.instante ?: 0.0
         var utiles = 0
@@ -145,8 +145,7 @@ class AdaptadorELM327Demo(
         Registro.i(Registro.CAPTURA, "Demostración ${grabacion.id}: enlace cerrado")
     }
 
-    private fun primerRefrigerante(tipo: TipoRegimen): Double? =
-        lecturas[tipo]?.firstNotNullOfOrNull { it.tempRefrigerante }
+    private fun primerRefrigerante(tipo: TipoRegimen): Double? = lecturas[tipo]?.firstNotNullOfOrNull { it.tempRefrigerante }
 
     companion object {
         /** Útiles que deja el R2 cortado de la demostración con rechazo (por debajo de 45). */
@@ -159,5 +158,5 @@ class AdaptadorELM327Demo(
 fun CatalogoDemoArchivos.adaptador(
     grabacion: GrabacionDemo,
     simularRechazo: Boolean = false,
-    aceleracion: Double = 20.0,
+    aceleracion: Double = 20.0
 ): AdaptadorELM327Demo = AdaptadorELM327Demo(archivos(grabacion), grabacion, simularRechazo, aceleracion)

@@ -21,7 +21,7 @@ data class FilaHistorial(
     val fecha: String,
     /** "Completa · Encendido y combustión, 72 %" o "Parcial · Sin diagnóstico" */
     val resultado: String,
-    val tieneDiagnostico: Boolean,
+    val tieneDiagnostico: Boolean
 )
 
 data class EstadoPantallaHistorial(
@@ -30,14 +30,11 @@ data class EstadoPantallaHistorial(
     val filas: List<FilaHistorial> = emptyList(),
     /** Atención elegida que no tiene diagnóstico (CU-06 E1 del paso 4). */
     val avisoSinDiagnostico: Boolean = false,
-    val error: String? = null,
+    val error: String? = null
 )
 
 /** Pantalla Historial (CU-06): datos del vehículo y sus atenciones, de la más reciente a la más antigua. */
-class HistorialViewModel(
-    private val contenedor: AppContenedor,
-    private val idVehiculo: Long,
-) : ViewModel() {
+class HistorialViewModel(private val contenedor: AppContenedor, private val idVehiculo: Long) : ViewModel() {
     private val _estado = MutableStateFlow(EstadoPantallaHistorial())
     val estado: StateFlow<EstadoPantallaHistorial> = _estado.asStateFlow()
 

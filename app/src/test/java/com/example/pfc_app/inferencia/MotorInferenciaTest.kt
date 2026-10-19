@@ -10,6 +10,8 @@ import com.example.pfc_app.procesamiento.Csv
 import com.example.pfc_app.procesamiento.MapaColumnas
 import com.example.pfc_app.procesamiento.ProcesadorCaracteristicas
 import com.example.pfc_app.validacion.ValidadorAtencion
+import java.io.File
+import kotlin.math.abs
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -17,8 +19,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
-import java.io.File
-import kotlin.math.abs
 
 /**
  * El modelo y el contrato se leen de src/main/assets/modelo/ (los mismos que van en
@@ -27,7 +27,13 @@ import kotlin.math.abs
  */
 class MotorInferenciaTest {
 
-    private data class Caso(val id: String, val clase: String, val fila: FilaCaracteristicas, val prob: Map<String, Double>, val claseOnnx: String)
+    private data class Caso(
+        val id: String,
+        val clase: String,
+        val fila: FilaCaracteristicas,
+        val prob: Map<String, Double>,
+        val claseOnnx: String
+    )
 
     private fun casos(): List<Caso> {
         val t = Csv.leer(Recursos.CASOS_INFERENCIA.readText())
@@ -41,7 +47,7 @@ class MotorInferenciaTest {
                 clase = f.getValue("clase_real"),
                 fila = FilaCaracteristicas(valores),
                 prob = clases.associateWith { MapaColumnas.aNumero(f["prob_$it"])!! },
-                claseOnnx = f.getValue("clase_onnx"),
+                claseOnnx = f.getValue("clase_onnx")
             )
         }
     }
@@ -103,7 +109,11 @@ class MotorInferenciaTest {
             dist / escala
         }
         assertEquals(distancias.sortedDescending(), distancias)
-        println("ATN-004: ${d.clase} ${d.probabilidad}; desviados ${d.parametrosDesviados.map { "${it.parametro} ${it.direccion.flecha}" }}")
+        println(
+            "ATN-004: ${d.clase} ${d.probabilidad}; desviados ${d.parametrosDesviados.map {
+                "${it.parametro} ${it.direccion.flecha}"
+            }}"
+        )
     }
 
     @Test

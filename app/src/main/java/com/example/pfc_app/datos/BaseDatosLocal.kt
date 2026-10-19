@@ -22,10 +22,10 @@ import androidx.room.RoomDatabase
     entities = [
         EntidadVehiculo::class, EntidadAtencion::class, EntidadRegimen::class, EntidadLectura::class,
         EntidadCodigoDtc::class, EntidadContadorModo06::class, EntidadDictamen::class,
-        EntidadDiagnostico::class, EntidadParametroDesviado::class,
+        EntidadDiagnostico::class, EntidadParametroDesviado::class
     ],
     version = BaseDatosLocal.VERSION,
-    exportSchema = true,
+    exportSchema = true
 )
 abstract class BaseDatosLocal : RoomDatabase() {
     abstract fun vehiculos(): DaoVehiculos
@@ -41,7 +41,7 @@ abstract class BaseDatosLocal : RoomDatabase() {
         /** Tablas en orden de dependencia (las hijas después de sus padres). */
         val TABLAS = listOf(
             "vehiculo", "atencion", "regimen", "lectura", "codigo_dtc",
-            "contador_modo06", "dictamen", "diagnostico", "parametro_desviado",
+            "contador_modo06", "dictamen", "diagnostico", "parametro_desviado"
         )
 
         /** [nombre] permite a las pruebas usar un archivo propio; null crea una base en memoria. */

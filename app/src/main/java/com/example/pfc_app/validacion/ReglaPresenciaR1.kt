@@ -17,7 +17,10 @@ class ReglaPresenciaR1 : ReglaBase() {
 
     override fun evaluar(atencion: Atencion): ResultadoRegla {
         val r1 = atencion.regimen(TipoRegimen.R1)
-        return if (r1 != null && r1.lecturas.isNotEmpty()) cumple(regimen = TipoRegimen.R1)
-        else degrada("R1 no capturado: el motor llegó caliente", TipoRegimen.R1)
+        return if (r1 != null && r1.lecturas.isNotEmpty()) {
+            cumple(regimen = TipoRegimen.R1)
+        } else {
+            degrada("R1 no capturado: el motor llegó caliente", TipoRegimen.R1)
+        }
     }
 }

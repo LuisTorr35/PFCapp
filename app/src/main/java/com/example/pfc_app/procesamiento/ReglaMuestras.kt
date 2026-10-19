@@ -17,7 +17,7 @@ class MuestrasRegimen(
     val descartadasTecho: Int,
     /** max(t) − min(t) de todas las filas, 0 con una sola fila. */
     val duracionBruta: Double,
-    val filasBrutas: Int,
+    val filasBrutas: Int
 ) {
     /** (n − 1) / duración bruta, como tasa_hz de diagnostico_importacion.csv (sin redondear). */
     val frecuenciaHz: Double get() = if (duracionBruta > 0) (filasBrutas - 1) / duracionBruta else 0.0

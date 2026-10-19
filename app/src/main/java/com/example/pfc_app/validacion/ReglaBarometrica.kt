@@ -16,7 +16,7 @@ import com.example.pfc_app.modelos.ResultadoRegla
 class ReglaBarometrica(
     private val minimo: Double = MINIMO_KPA,
     private val maximo: Double = MAXIMO_KPA,
-    private val porDefecto: Double = SUSTITUIDA_KPA,
+    private val porDefecto: Double = SUSTITUIDA_KPA
 ) : ReglaBase() {
     override val numero = 9
     override val nivel = NivelRegla.OBLIGATORIA
@@ -24,19 +24,24 @@ class ReglaBarometrica(
 
     override fun evaluar(atencion: Atencion): ResultadoRegla {
         val baro = atencion.barometricaSesion ?: return degrada(
-            "Barométrica no registrada: el vehículo no expone el PID 0x33 ni hay MAP con el motor apagado",
+            "Barométrica no registrada: el vehículo no expone el PID 0x33 ni hay MAP con el motor apagado"
         )
         val origen = if (atencion.barometricaDesdeMap) " (MAP con el motor apagado)" else ""
         return when {
             baro in minimo..maximo ->
-                if (atencion.barometricaDesdeMap) cumple("Barométrica tomada de la MAP con el motor apagado: ${texto(baro)} kPa")
-                else cumple()
+                if (atencion.barometricaDesdeMap) {
+                    cumple("Barométrica tomada de la MAP con el motor apagado: ${texto(baro)} kPa")
+                } else {
+                    cumple()
+                }
+
             baro >= porDefecto -> degrada(
                 "Barométrica sustituida por defecto (${texto(baro)} kPa$origen, la atmósfera a nivel del mar): " +
-                    "la unidad de control no la midió",
+                    "la unidad de control no la midió"
             )
+
             else -> degrada(
-                "Barométrica fuera de rango (${texto(baro)} kPa$origen; se esperan entre ${texto(minimo)} y ${texto(maximo)} kPa)",
+                "Barométrica fuera de rango (${texto(baro)} kPa$origen; se esperan entre ${texto(minimo)} y ${texto(maximo)} kPa)"
             )
         }
     }

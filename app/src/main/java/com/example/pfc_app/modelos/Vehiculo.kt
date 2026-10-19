@@ -34,5 +34,5 @@ data class Vehiculo(
     val modelo: String,
     val anio: Int,
     val cilindros: Int,
-    val familiaGestion: FamiliaGestion? = null,
+    val familiaGestion: FamiliaGestion? = null
 )

@@ -60,15 +60,14 @@ object DescripcionesDTC {
         "P0506" to "Ralentí más bajo de lo esperado",
         "P0507" to "Ralentí más alto de lo esperado",
         "P0562" to "Voltaje del sistema bajo",
-        "P0563" to "Voltaje del sistema alto",
+        "P0563" to "Voltaje del sistema alto"
     )
 
-    fun descripcion(codigo: String): String =
-        TABLA[codigo.uppercase()] ?: when (codigo.firstOrNull()?.uppercaseChar()) {
-            'P' -> "Tren motriz (motor y transmisión)"
-            'C' -> "Chasis"
-            'B' -> "Carrocería"
-            'U' -> "Red de comunicación entre módulos"
-            else -> ""
-        }
+    fun descripcion(codigo: String): String = TABLA[codigo.uppercase()] ?: when (codigo.firstOrNull()?.uppercaseChar()) {
+        'P' -> "Tren motriz (motor y transmisión)"
+        'C' -> "Chasis"
+        'B' -> "Carrocería"
+        'U' -> "Red de comunicación entre módulos"
+        else -> ""
+    }
 }

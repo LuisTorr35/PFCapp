@@ -9,15 +9,15 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.example.pfc_app.Registro
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.UUID
 
 /**
  * Enlace RFCOMM con el adaptador por el perfil de puerto serie (SPP) del Bluetooth
@@ -33,7 +33,7 @@ import java.util.UUID
 class TransporteBluetooth(
     private val contexto: Context,
     private val direccionMac: String,
-    private val despachador: CoroutineDispatcher = Dispatchers.IO,
+    private val despachador: CoroutineDispatcher = Dispatchers.IO
 ) : TransporteSerie {
 
     override val descripcion: String = "Bluetooth $direccionMac"
@@ -74,7 +74,8 @@ class TransporteBluetooth(
             Registro.i(Registro.BT, "Socket RFCOMM abierto con $direccionMac")
         } catch (e: SecurityException) {
             throw PermisoBluetoothException(
-                "Falta el permiso de Bluetooth (dispositivos cercanos). Concédalo a la aplicación en Ajustes.", e,
+                "Falta el permiso de Bluetooth (dispositivos cercanos). Concédalo a la aplicación en Ajustes.",
+                e
             )
         } catch (e: IllegalArgumentException) {
             throw AdaptadorNoEncontradoException("La dirección $direccionMac no es una dirección Bluetooth válida", e)
@@ -86,7 +87,7 @@ class TransporteBluetooth(
     private fun conectarSocket(dispositivo: BluetoothDevice): BluetoothSocket {
         val intentos = listOf<Pair<String, () -> BluetoothSocket>>(
             "seguro" to { dispositivo.createRfcommSocketToServiceRecord(UUID_SPP) },
-            "inseguro" to { dispositivo.createInsecureRfcommSocketToServiceRecord(UUID_SPP) },
+            "inseguro" to { dispositivo.createInsecureRfcommSocketToServiceRecord(UUID_SPP) }
         )
         var ultimo: IOException? = null
         for ((nombre, crear) in intentos) {
@@ -114,13 +115,12 @@ class TransporteBluetooth(
             "No se pudo abrir el puerto serie con «${nombre ?: direccionMac}» ($direccionMac) tras 2 intentos. " +
                 "El dispositivo elegido no responde como adaptador ELM327: revise que sea el adaptador OBD-II, " +
                 "que esté enchufado al conector del vehículo con el contacto puesto y vinculado con el teléfono.",
-            ultimo,
+            ultimo
         )
     }
 
-    private fun puedeCancelarDescubrimiento(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            contexto.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+    private fun puedeCancelarDescubrimiento(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+        contexto.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
 
     private fun iniciarLector(flujo: InputStream) {
         hiloLector = Thread({
@@ -155,12 +155,11 @@ class TransporteBluetooth(
         }
     }
 
-    override suspend fun leer(): ByteArray =
-        try {
-            recibidos.receive()
-        } catch (e: ClosedReceiveChannelException) {
-            throw EnlaceCaidoException("El enlace con el adaptador está cerrado", e)
-        }
+    override suspend fun leer(): ByteArray = try {
+        recibidos.receive()
+    } catch (e: ClosedReceiveChannelException) {
+        throw EnlaceCaidoException("El enlace con el adaptador está cerrado", e)
+    }
 
     override suspend fun descartarEntrada() {
         while (recibidos.tryReceive().isSuccess) Unit

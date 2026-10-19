@@ -11,10 +11,8 @@ import org.junit.rules.ExternalResource
  * empiece limpia (el primer vehículo registrado es VEH-001). [configurar] permite
  * instalar falsos en el contenedor. Va por fuera de la regla de Compose en un RuleChain.
  */
-class ReglaBaseLimpia(
-    private val modoDemostracion: Boolean = true,
-    private val configurar: (AppContenedor) -> Unit = {},
-) : ExternalResource() {
+class ReglaBaseLimpia(private val modoDemostracion: Boolean = true, private val configurar: (AppContenedor) -> Unit = {}) :
+    ExternalResource() {
     private val contenedor: AppContenedor
         get() = ApplicationProvider.getApplicationContext<PfcApp>().contenedor
 

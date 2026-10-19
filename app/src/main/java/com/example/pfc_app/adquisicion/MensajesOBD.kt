@@ -80,11 +80,13 @@ object MensajesOBD {
                     if (plano.length < 5 || (plano.length - 3) % 2 != 0) continue
                     salida += TramaOBD(plano.substring(0, 3).toInt(16), bytes(plano.substring(3)), linea)
                 }
+
                 FormatoTrama.CAN_29 -> {
                     if (plano.length < 10 || plano.length % 2 != 0) continue
                     val cab = bytes(plano.substring(0, 8))
                     salida += TramaOBD(cab[3], bytes(plano.substring(8)), linea)
                 }
+
                 FormatoTrama.LEGADO -> {
                     if (plano.length % 2 != 0) continue
                     val b = bytes(plano)
@@ -113,11 +115,13 @@ object MensajesOBD {
                     if (largo == 0) continue
                     salida += MensajeOBD(t.origen, t.bytes.drop(1).take(largo), 1)
                 }
+
                 0x1 -> {
                     if (t.bytes.size < 2) continue
                     val largo = ((pci and 0x0F) shl 8) or t.bytes[1]
                     pendientes[t.origen] = Pendiente(largo, ArrayList(t.bytes.drop(2)), 1)
                 }
+
                 0x2 -> {
                     val p = pendientes[t.origen] ?: continue
                     p.datos += t.bytes.drop(1)
@@ -127,6 +131,7 @@ object MensajesOBD {
                         pendientes.remove(t.origen)
                     }
                 }
+
                 else -> Unit // control de flujo (3x): lo maneja el ELM327
             }
         }

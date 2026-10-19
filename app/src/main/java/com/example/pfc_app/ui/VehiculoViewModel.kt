@@ -22,7 +22,7 @@ data class SolicitudGrabacion(
     val vehiculo: Vehiculo,
     val grabaciones: List<GrabacionDemo>,
     val indice: Int = 0,
-    val simularRechazo: Boolean = false,
+    val simularRechazo: Boolean = false
 ) {
     val elegida: GrabacionDemo? get() = grabaciones.getOrNull(indice)
 }
@@ -46,7 +46,7 @@ data class EstadoVehiculos(
     val dispositivos: List<DispositivoBT>? = null,
     /** "Atender" en modo real sin adaptador elegido. */
     val pideAdaptador: Boolean = false,
-    val error: String? = null,
+    val error: String? = null
 ) {
     /** Lista filtrada por la búsqueda por código (acepta "VEH-010", "010" o "10"). */
     val vehiculosFiltrados: List<Vehiculo>
@@ -83,8 +83,10 @@ class VehiculoViewModel(private val contenedor: AppContenedor) : ViewModel() {
 
     fun cambiarMarca(v: String) = _estado.update { it.copy(marca = v, errores = it.errores.copy(marca = null), mensaje = null) }
     fun cambiarModelo(v: String) = _estado.update { it.copy(modelo = v, errores = it.errores.copy(modelo = null), mensaje = null) }
-    fun cambiarAnio(v: String) = _estado.update { it.copy(anio = v.filter(Char::isDigit).take(4), errores = it.errores.copy(anio = null), mensaje = null) }
-    fun cambiarCilindros(v: String) = _estado.update { it.copy(cilindros = v.filter(Char::isDigit).take(2), errores = it.errores.copy(cilindros = null), mensaje = null) }
+    fun cambiarAnio(v: String) =
+        _estado.update { it.copy(anio = v.filter(Char::isDigit).take(4), errores = it.errores.copy(anio = null), mensaje = null) }
+    fun cambiarCilindros(v: String) =
+        _estado.update { it.copy(cilindros = v.filter(Char::isDigit).take(2), errores = it.errores.copy(cilindros = null), mensaje = null) }
     fun cambiarBusqueda(v: String) = _estado.update { it.copy(busqueda = v) }
 
     /** CU-01: valida los cuatro datos, asigna VEH-### y lo guarda. */
@@ -111,10 +113,14 @@ class VehiculoViewModel(private val contenedor: AppContenedor) : ViewModel() {
                 Registro.i(Registro.UI, "Vehículo registrado ${vehiculo.codigo}")
                 _estado.update {
                     it.copy(
-                        vehiculos = lista, registrando = false,
-                        marca = "", modelo = "", anio = "", cilindros = "",
+                        vehiculos = lista,
+                        registrando = false,
+                        marca = "",
+                        modelo = "",
+                        anio = "",
+                        cilindros = "",
                         busqueda = "",
-                        mensaje = "Vehículo registrado: ${vehiculo.codigo}",
+                        mensaje = "Vehículo registrado: ${vehiculo.codigo}"
                     )
                 }
             }

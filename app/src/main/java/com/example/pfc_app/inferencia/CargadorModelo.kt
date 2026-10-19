@@ -19,12 +19,11 @@ object CargadorModelo {
         val assets = contexto.applicationContext.assets
         val nombres = assets.list(carpeta)?.toList().orEmpty()
         val fuente = object : FuenteArchivos {
-            override fun leerBytes(nombre: String): ByteArray? =
-                try {
-                    assets.open("$carpeta/$nombre").use { it.readBytes() }
-                } catch (_: FileNotFoundException) {
-                    null
-                }
+            override fun leerBytes(nombre: String): ByteArray? = try {
+                assets.open("$carpeta/$nombre").use { it.readBytes() }
+            } catch (_: FileNotFoundException) {
+                null
+            }
 
             override fun lista(): List<String> = nombres
 
@@ -49,7 +48,7 @@ object CargadorModelo {
             Registro.INFERENCIA,
             "Modelo ${contrato.versionModelo}${if (contrato.provisional) " (PROVISIONAL)" else ""} desde $descripcion/" +
                 "${contrato.archivoOnnx}: ${contrato.clases.size} clases, ${contrato.caracteristicas.size} características, " +
-                "${(System.nanoTime() - inicio) / 1_000_000} ms",
+                "${(System.nanoTime() - inicio) / 1_000_000} ms"
         )
         return modelo
     }

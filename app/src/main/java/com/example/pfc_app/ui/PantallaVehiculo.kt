@@ -72,7 +72,7 @@ import com.example.pfc_app.ui.theme.Negro
 fun PantallaVehiculo(
     vm: VehiculoViewModel,
     alAtender: (vehiculo: Vehiculo, idGrabacion: String?, simularRechazo: Boolean) -> Unit,
-    alAbrirHistorial: (Vehiculo) -> Unit,
+    alAbrirHistorial: (Vehiculo) -> Unit
 ) {
     val estado by vm.estado.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
@@ -107,7 +107,9 @@ fun PantallaVehiculo(
     fun conBluetoothEncendido(accion: () -> Unit) {
         when {
             !DispositivosBluetooth.existe(contexto) -> vm.mostrarError("Este teléfono no tiene Bluetooth.")
+
             DispositivosBluetooth.disponible(contexto) -> accion()
+
             else -> {
                 Registro.i(Registro.BT, "Bluetooth apagado: se pide encenderlo")
                 trasEncender = accion
@@ -131,7 +133,7 @@ fun PantallaVehiculo(
             Registro.w(Registro.BT, "El mecánico rechazó el permiso BLUETOOTH_CONNECT")
             vm.mostrarError(
                 "Sin el permiso de dispositivos cercanos no se puede usar el adaptador Bluetooth. " +
-                    "Puede concederlo en Ajustes › Aplicaciones › PFC-app › Permisos.",
+                    "Puede concederlo en Ajustes › Aplicaciones › PFC-app › Permisos."
             )
         } else if (pidiendoParaSelector) {
             conBluetoothEncendido { vm.abrirSelectorAdaptador() }
@@ -142,9 +144,8 @@ fun PantallaVehiculo(
         pidiendoParaSelector = false
     }
 
-    fun tienePermisoBluetooth(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            ContextCompat.checkSelfPermission(contexto, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+    fun tienePermisoBluetooth(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+        ContextCompat.checkSelfPermission(contexto, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
 
     fun elegirAdaptador() {
         if (tienePermisoBluetooth()) {
@@ -158,12 +159,15 @@ fun PantallaVehiculo(
     fun atender(v: Vehiculo) {
         when {
             estado.modoDemostracion -> vm.pedirGrabacion(v)
+
             estado.macAdaptador == null -> vm.pedirAdaptador(true)
+
             !tienePermisoBluetooth() -> {
                 pendiente = v
                 pidiendoParaSelector = false
                 lanzadorPermiso.launch(Manifest.permission.BLUETOOTH_CONNECT)
             }
+
             else -> conBluetoothEncendido { alAtender(v, null, false) }
         }
     }
@@ -173,7 +177,7 @@ fun PantallaVehiculo(
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag(EtiquetasPrueba.LISTA_VEHICULOS),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "modo") {
                 TarjetaModo(
@@ -181,7 +185,7 @@ fun PantallaVehiculo(
                     nombreAdaptador = estado.nombreAdaptador,
                     macAdaptador = estado.macAdaptador,
                     alCambiarModo = vm::cambiarModoDemostracion,
-                    alElegirAdaptador = ::elegirAdaptador,
+                    alElegirAdaptador = ::elegirAdaptador
                 )
             }
             item(key = "formulario") { FormularioRegistro(estado, vm) }
@@ -194,15 +198,18 @@ fun PantallaVehiculo(
                     placeholder = { Text("Buscar por código") },
                     singleLine = true,
                     shape = FormaBoton,
-                    colors = coloresCampo(),
+                    colors = coloresCampo()
                 )
             }
             val lista = estado.vehiculosFiltrados
             if (lista.isEmpty()) {
                 item(key = "vacio") {
                     TextoSecundario(
-                        if (estado.vehiculos.isEmpty()) "Todavía no hay vehículos registrados."
-                        else "Ningún vehículo coincide con \"${estado.busqueda.trim()}\".",
+                        if (estado.vehiculos.isEmpty()) {
+                            "Todavía no hay vehículos registrados."
+                        } else {
+                            "Ningún vehículo coincide con \"${estado.busqueda.trim()}\"."
+                        }
                     )
                 }
             }
@@ -222,7 +229,7 @@ fun PantallaVehiculo(
                 vm.cerrarDialogoGrabacion()
                 if (g != null) alAtender(s.vehiculo, g.id, s.simularRechazo)
             },
-            alCancelar = vm::cerrarDialogoGrabacion,
+            alCancelar = vm::cerrarDialogoGrabacion
         )
     }
 
@@ -231,8 +238,13 @@ fun PantallaVehiculo(
             onDismissRequest = { vm.pedirAdaptador(false) },
             title = { Text("Elija el adaptador") },
             text = { Text("Para atender en modo real, elija primero el adaptador ELM327 vinculado con el teléfono.") },
-            confirmButton = { TextButton(onClick = { vm.pedirAdaptador(false); elegirAdaptador() }) { Text("Elegir adaptador") } },
-            dismissButton = { TextButton(onClick = { vm.pedirAdaptador(false) }) { Text("Cancelar") } },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.pedirAdaptador(false)
+                    elegirAdaptador()
+                }) { Text("Elegir adaptador") }
+            },
+            dismissButton = { TextButton(onClick = { vm.pedirAdaptador(false) }) { Text("Cancelar") } }
         )
     }
 
@@ -251,7 +263,7 @@ fun PantallaVehiculo(
                                 Modifier
                                     .fillMaxWidth()
                                     .selectable(selected = d.direccionMac == estado.macAdaptador, onClick = { vm.elegirAdaptador(d) })
-                                    .padding(vertical = 10.dp),
+                                    .padding(vertical = 10.dp)
                             ) {
                                 Text(d.nombre.ifBlank { "(sin nombre)" }, fontWeight = FontWeight.Bold)
                                 TextoSecundario(d.direccionMac)
@@ -260,7 +272,7 @@ fun PantallaVehiculo(
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = vm::cerrarSelectorAdaptador) { Text("Cerrar") } },
+            confirmButton = { TextButton(onClick = vm::cerrarSelectorAdaptador) { Text("Cerrar") } }
         )
     }
 
@@ -269,7 +281,7 @@ fun PantallaVehiculo(
             onDismissRequest = vm::cerrarError,
             title = { Text("Aviso") },
             text = { Text(mensaje) },
-            confirmButton = { TextButton(onClick = vm::cerrarError) { Text("Aceptar") } },
+            confirmButton = { TextButton(onClick = vm::cerrarError) { Text("Aceptar") } }
         )
     }
 }
@@ -280,7 +292,7 @@ private fun TarjetaModo(
     nombreAdaptador: String?,
     macAdaptador: String?,
     alCambiarModo: (Boolean) -> Unit,
-    alElegirAdaptador: () -> Unit,
+    alElegirAdaptador: () -> Unit
 ) {
     Tarjeta(fusionar = false) {
         // Toda la fila cambia el modo, no solo el interruptor (en el teléfono se tocaba el texto).
@@ -289,13 +301,16 @@ private fun TarjetaModo(
                 .fillMaxWidth()
                 .toggleable(value = modoDemostracion, onValueChange = alCambiarModo, role = Role.Switch)
                 .testTag(EtiquetasPrueba.INTERRUPTOR_DEMO),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {
                 TituloTarjeta("Modo demostración")
                 TextoSecundario(
-                    if (modoDemostracion) "Se reproducen atenciones grabadas, sin adaptador ni vehículo."
-                    else "Se lee el vehículo con el adaptador ELM327 por Bluetooth.",
+                    if (modoDemostracion) {
+                        "Se reproducen atenciones grabadas, sin adaptador ni vehículo."
+                    } else {
+                        "Se lee el vehículo con el adaptador ELM327 por Bluetooth."
+                    }
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -309,21 +324,24 @@ private fun TarjetaModo(
                     checkedTrackColor = MaterialTheme.colorScheme.primary,
                     uncheckedThumbColor = GrisBorde,
                     uncheckedTrackColor = MaterialTheme.colorScheme.surface,
-                    uncheckedBorderColor = GrisBorde,
-                ),
+                    uncheckedBorderColor = GrisBorde
+                )
             )
         }
         if (!modoDemostracion) {
             Spacer(Modifier.height(4.dp))
             Text("Adaptador ELM327", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             TextoTarjeta(
-                if (macAdaptador == null) "Ningún adaptador elegido"
-                else "${nombreAdaptador?.ifBlank { null } ?: "Adaptador"} · $macAdaptador",
+                if (macAdaptador == null) {
+                    "Ningún adaptador elegido"
+                } else {
+                    "${nombreAdaptador?.ifBlank { null } ?: "Adaptador"} · $macAdaptador"
+                }
             )
             BotonSecundario(
                 if (macAdaptador == null) "Elegir adaptador" else "Cambiar adaptador",
                 alElegirAdaptador,
-                modifier = Modifier.testTag(EtiquetasPrueba.BOTON_ELEGIR_ADAPTADOR),
+                modifier = Modifier.testTag(EtiquetasPrueba.BOTON_ELEGIR_ADAPTADOR)
             )
         }
     }
@@ -335,16 +353,34 @@ private fun FormularioRegistro(estado: EstadoVehiculos, vm: VehiculoViewModel) {
         TituloTarjeta("Registrar vehículo")
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             CampoFormulario("Marca", estado.marca, vm::cambiarMarca, estado.errores.marca, EtiquetasPrueba.CAMPO_MARCA, Modifier.weight(1f))
-            CampoFormulario("Modelo", estado.modelo, vm::cambiarModelo, estado.errores.modelo, EtiquetasPrueba.CAMPO_MODELO, Modifier.weight(1f))
+            CampoFormulario(
+                "Modelo",
+                estado.modelo,
+                vm::cambiarModelo,
+                estado.errores.modelo,
+                EtiquetasPrueba.CAMPO_MODELO,
+                Modifier.weight(1f)
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             CampoFormulario(
-                "Año", estado.anio, vm::cambiarAnio, estado.errores.anio, EtiquetasPrueba.CAMPO_ANIO, Modifier.weight(1f),
-                numerico = true,
+                "Año",
+                estado.anio,
+                vm::cambiarAnio,
+                estado.errores.anio,
+                EtiquetasPrueba.CAMPO_ANIO,
+                Modifier.weight(1f),
+                numerico = true
             )
             CampoFormulario(
-                "Cilindros", estado.cilindros, vm::cambiarCilindros, estado.errores.cilindros, EtiquetasPrueba.CAMPO_CILINDROS,
-                Modifier.weight(1f), numerico = true, alTerminar = vm::registrar,
+                "Cilindros",
+                estado.cilindros,
+                vm::cambiarCilindros,
+                estado.errores.cilindros,
+                EtiquetasPrueba.CAMPO_CILINDROS,
+                Modifier.weight(1f),
+                numerico = true,
+                alTerminar = vm::registrar
             )
         }
         TextoTarjeta("La aplicación asigna el código y la familia de gestión.")
@@ -353,14 +389,14 @@ private fun FormularioRegistro(estado: EstadoVehiculos, vm: VehiculoViewModel) {
             texto = if (estado.registrando) "Registrando…" else "Registrar",
             alPulsar = vm::registrar,
             habilitado = !estado.registrando,
-            modifier = Modifier.testTag(EtiquetasPrueba.BOTON_REGISTRAR),
+            modifier = Modifier.testTag(EtiquetasPrueba.BOTON_REGISTRAR)
         )
         estado.mensaje?.let {
             Text(
                 it,
                 modifier = Modifier.testTag(EtiquetasPrueba.MENSAJE_REGISTRO),
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
+                fontSize = 15.sp
             )
         }
     }
@@ -376,7 +412,7 @@ private fun CampoFormulario(
     modifier: Modifier = Modifier,
     numerico: Boolean = false,
     /** Acción "Listo" del teclado; sin ella, el teclado pasa al campo siguiente. */
-    alTerminar: (() -> Unit)? = null,
+    alTerminar: (() -> Unit)? = null
 ) {
     Column(modifier) {
         Text(etiqueta, fontSize = 15.sp)
@@ -389,11 +425,11 @@ private fun CampoFormulario(
             supportingText = error?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (numerico) KeyboardType.Number else KeyboardType.Text,
-                imeAction = if (alTerminar != null) ImeAction.Done else ImeAction.Next,
+                imeAction = if (alTerminar != null) ImeAction.Done else ImeAction.Next
             ),
             keyboardActions = KeyboardActions(onDone = { alTerminar?.invoke() }),
             shape = FormaBoton,
-            colors = coloresCampo(),
+            colors = coloresCampo()
         )
     }
 }
@@ -402,7 +438,7 @@ private fun CampoFormulario(
 private fun coloresCampo() = OutlinedTextFieldDefaults.colors(
     focusedBorderColor = MaterialTheme.colorScheme.outline,
     unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-    cursorColor = MaterialTheme.colorScheme.onSurface,
+    cursorColor = MaterialTheme.colorScheme.onSurface
 )
 
 @Composable
@@ -412,7 +448,7 @@ private fun FilaVehiculo(v: Vehiculo, alAtender: () -> Unit, alHistorial: () -> 
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextoTarjeta(
                 "${Formatos.cilindros(v.cilindros)} · ${Formatos.familiaCorta(v.familiaGestion)}",
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
             BotonSecundario("Atender", alAtender, Modifier.testTag(EtiquetasPrueba.botonAtender(v.codigo)))
             Spacer(Modifier.width(8.dp))
@@ -428,7 +464,7 @@ private fun DialogoGrabacion(
     alElegir: (Int) -> Unit,
     alCambiarRechazo: (Boolean) -> Unit,
     alConfirmar: () -> Unit,
-    alCancelar: () -> Unit,
+    alCancelar: () -> Unit
 ) {
     AlertDialog(
         modifier = Modifier.testTag(EtiquetasPrueba.DIALOGO_GRABACION),
@@ -445,12 +481,12 @@ private fun DialogoGrabacion(
                             .selectable(selected = i == solicitud.indice, onClick = { alElegir(i) }, role = Role.RadioButton)
                             .testTag(EtiquetasPrueba.opcionGrabacion(i))
                             .padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
                             selected = i == solicitud.indice,
                             onClick = null,
-                            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.onSurface),
+                            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.onSurface)
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(g.descripcion, fontSize = 15.sp)
@@ -463,12 +499,12 @@ private fun DialogoGrabacion(
                         .toggleable(value = solicitud.simularRechazo, onValueChange = alCambiarRechazo, role = Role.Checkbox)
                         .testTag(EtiquetasPrueba.CASILLA_RECHAZO)
                         .padding(vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
                         checked = solicitud.simularRechazo,
                         onCheckedChange = null,
-                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.onSurface),
+                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.onSurface)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text("Simular R2 rechazado (R2 corto)", fontSize = 15.sp)
@@ -482,6 +518,6 @@ private fun DialogoGrabacion(
         },
         dismissButton = {
             TextButton(onClick = alCancelar) { Text("Cancelar", color = MaterialTheme.colorScheme.onSurface) }
-        },
+        }
     )
 }

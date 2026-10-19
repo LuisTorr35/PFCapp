@@ -18,7 +18,7 @@ object AtencionesSinteticas {
         ect: (Int) -> Double? = { 90.0 },
         rpm: (Int) -> Double? = { 750.0 + (it % 5) },
         ltft: (Int) -> Double? = { 2.344 },
-        velocidad: Double? = 0.0,
+        velocidad: Double? = 0.0
     ): Regimen = Regimen(
         tipo = tipo,
         lecturas = (0 until n).map { i ->
@@ -31,9 +31,9 @@ object AtencionesSinteticas {
                 cargaCalculada = 22.353,
                 avanceEncendido = 8.0 + (i % 4) * 0.5,
                 map = 30.0,
-                velocidad = velocidad,
+                velocidad = velocidad
             )
-        },
+        }
     )
 
     /** R3 con [rampas] subidas de 800 a [pico] rpm y vuelta al ralentí, 20 filas por rampa. */
@@ -42,7 +42,7 @@ object AtencionesSinteticas {
         pico: Double = 3100.0,
         ltft: (Int) -> Double? = { 2.344 },
         velocidad: (Int) -> Double? = { 0.0 },
-        filasExtra: Int = 20,
+        filasExtra: Int = 20
     ): Regimen {
         val perfil = ArrayList<Double>()
         repeat(filasExtra) { perfil += 800.0 }
@@ -61,9 +61,9 @@ object AtencionesSinteticas {
                     ltft = ltft(i),
                     cargaCalculada = 20.0 + rpm / 100,
                     avanceEncendido = 15.0,
-                    velocidad = velocidad(i),
+                    velocidad = velocidad(i)
                 )
-            },
+            }
         )
     }
 
@@ -72,12 +72,12 @@ object AtencionesSinteticas {
         r2: Regimen? = ralenti(TipoRegimen.R2),
         r3: Regimen? = aceleraciones(),
         baro: Double? = 74.0,
-        mapContacto: Double? = null,
+        mapContacto: Double? = null
     ): Atencion = Atencion(
         idVehiculo = 1,
         fecha = "2026-10-19 10:00",
         baroKpa = baro,
         mapContactoKpa = mapContacto,
-        regimenes = listOfNotNull(r1, r2, r3).associateBy { it.tipo },
+        regimenes = listOfNotNull(r1, r2, r3).associateBy { it.tipo }
     )
 }

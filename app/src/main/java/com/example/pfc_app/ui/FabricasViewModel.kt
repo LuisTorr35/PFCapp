@@ -25,11 +25,10 @@ fun Throwable.mensajeLegible(): String = when (this) {
 }
 
 /** Relanza la cancelación de corrutinas; cualquier otro error se entrega a [alFallar]. */
-inline fun <T> intentar(alFallar: (Throwable) -> T, bloque: () -> T): T =
-    try {
-        bloque()
-    } catch (c: CancellationException) {
-        throw c
-    } catch (t: Throwable) {
-        alFallar(t)
-    }
+inline fun <T> intentar(alFallar: (Throwable) -> T, bloque: () -> T): T = try {
+    bloque()
+} catch (c: CancellationException) {
+    throw c
+} catch (t: Throwable) {
+    alFallar(t)
+}

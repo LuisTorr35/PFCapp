@@ -61,7 +61,7 @@ class ProcesadorCaracteristicasTest {
             Lectura(15.0, rpm = 700.0, stft = 1.0),
             Lectura(16.0, rpm = 1500.0, stft = 50.0), // acelerón: techo de ralentí
             Lectura(17.0, rpm = null, stft = 3.0), // sin rpm: se conserva
-            Lectura(18.0, rpm = 1100.0, stft = 2.0),
+            Lectura(18.0, rpm = 1100.0, stft = 2.0)
         )
         val c = procesador.contarMuestras(r2)
         assertEquals(3, c.muestrasUtiles)
@@ -83,7 +83,7 @@ class ProcesadorCaracteristicasTest {
         val pocas = regimen(
             TipoRegimen.R3,
             Lectura(0.0, rpm = 800.0),
-            *(0 until 5).map { Lectura(15.0 + it, rpm = 1000.0 + 500 * it) }.toTypedArray(),
+            *(0 until 5).map { Lectura(15.0 + it, rpm = 1000.0 + 500 * it) }.toTypedArray()
         )
         val f1 = procesador.calcularCaracteristicas(Atencion(idVehiculo = 0, fecha = "", regimenes = mapOf(TipoRegimen.R3 to pocas)))
         assertNull(f1["R3_rpm_pendiente"])
@@ -91,7 +91,7 @@ class ProcesadorCaracteristicasTest {
         val seis = regimen(
             TipoRegimen.R3,
             Lectura(0.0, rpm = 800.0),
-            *(0 until 6).map { Lectura(15.0 + it, rpm = 1000.0 + 500 * it) }.toTypedArray(),
+            *(0 until 6).map { Lectura(15.0 + it, rpm = 1000.0 + 500 * it) }.toTypedArray()
         )
         val f2 = procesador.calcularCaracteristicas(Atencion(idVehiculo = 0, fecha = "", regimenes = mapOf(TipoRegimen.R3 to seis)))
         assertEquals(500.0, f2["R3_rpm_pendiente"]!!, 0.0)
@@ -112,7 +112,7 @@ class ProcesadorCaracteristicasTest {
 
     @Test
     fun csvConBomComillasYComasDentro() {
-        val t = Csv.leer("﻿a,b,c\r\n1,\"x, y\",3\r\n\r\n4,\"dijo \"\"hola\"\"\",\r\n")
+        val t = Csv.leer("\uFEFFa,b,c\r\n1,\"x, y\",3\r\n\r\n4,\"dijo \"\"hola\"\"\",\r\n")
         assertEquals(listOf("a", "b", "c"), t.encabezados)
         assertEquals(listOf("1", "x, y", "3"), t.filas[0])
         assertEquals(listOf("4", "dijo \"hola\"", ""), t.filas[1])
@@ -125,7 +125,9 @@ class ProcesadorCaracteristicasTest {
 
     @Test
     fun mapeoDeEncabezadosComoElConsolidador() {
-        val m = MapaColumnas.mapear(listOf("Time (s)", "Engine RPM (rpm)", "Short Term Fuel Trim Bank 1 (%)", "Velocidad", "Timing Advance"))
+        val m = MapaColumnas.mapear(
+            listOf("Time (s)", "Engine RPM (rpm)", "Short Term Fuel Trim Bank 1 (%)", "Velocidad", "Timing Advance")
+        )
         assertEquals(0, m["t_seg"])
         assertEquals(1, m["rpm"])
         assertEquals(2, m["stft_b1_pct"])

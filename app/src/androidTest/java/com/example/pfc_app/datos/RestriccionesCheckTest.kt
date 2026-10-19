@@ -68,7 +68,7 @@ class RestriccionesCheckTest {
             assertRechazo(c) {
                 sql.execSQL(
                     "INSERT INTO ${c.tabla} (${columnas.joinToString()}) SELECT $seleccion FROM ${c.tabla} LIMIT 1",
-                    arrayOf(invalido),
+                    arrayOf(invalido)
                 )
             }
             assertRechazo(c) { sql.execSQL("UPDATE ${c.tabla} SET ${c.columna} = ?", arrayOf(invalido)) }
@@ -108,12 +108,11 @@ class RestriccionesCheckTest {
             buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1)) }
         }
 
-    private fun columnasSinClave(tabla: String): List<String> =
-        sql.query("PRAGMA table_info($tabla)").use { c ->
-            val nombre = c.getColumnIndexOrThrow("name")
-            val clave = c.getColumnIndexOrThrow("pk")
-            buildList { while (c.moveToNext()) if (c.getInt(clave) == 0) add(c.getString(nombre)) }
-        }
+    private fun columnasSinClave(tabla: String): List<String> = sql.query("PRAGMA table_info($tabla)").use { c ->
+        val nombre = c.getColumnIndexOrThrow("name")
+        val clave = c.getColumnIndexOrThrow("pk")
+        buildList { while (c.moveToNext()) if (c.getInt(clave) == 0) add(c.getString(nombre)) }
+    }
 
     private fun assertRechazo(c: RestriccionesCheck.Check, bloque: () -> Unit) {
         try {
@@ -134,11 +133,16 @@ class RestriccionesCheckTest {
             baroKpa = 75.0,
             codigos = listOf(CodigoDTC("P0303", TipoDTC.ALMACENADO)),
             contadoresModo06 = listOf(ContadorModo06(1, 0, 0)),
-            regimenes = mapOf(TipoRegimen.R2 to Regimen(tipo = TipoRegimen.R2, lecturas = lecturas, muestrasUtiles = 46, frecuenciaHz = 2.5)),
+            regimenes = mapOf(
+                TipoRegimen.R2 to Regimen(tipo = TipoRegimen.R2, lecturas = lecturas, muestrasUtiles = 46, frecuenciaHz = 2.5)
+            )
         )
         val diagnostico = Diagnostico(
-            clase = "C1", nombreClase = "C1", probabilidad = 0.72, versionModelo = "0.1.0-provisional",
-            parametrosDesviados = listOf(ParametroDesviado("R2_rpm_desv", 14.9, 3.5, Direccion.MAYOR)),
+            clase = "C1",
+            nombreClase = "C1",
+            probabilidad = 0.72,
+            versionModelo = "0.1.0-provisional",
+            parametrosDesviados = listOf(ParametroDesviado("R2_rpm_desv", 14.9, 3.5, Direccion.MAYOR))
         )
         RepositorioAtenciones(base).guardar(atencion, Dictamen(ResultadoDictamen.COMPLETA, emptyList()), diagnostico)
     }
@@ -165,7 +169,7 @@ class RestriccionesCheckTest {
             "contador_modo06.conteo_promedio" to -1,
             "dictamen.resultado" to "rechazada",
             "diagnostico.probabilidad" to 1.5,
-            "parametro_desviado.direccion" to "igual",
+            "parametro_desviado.direccion" to "igual"
         )
     }
 }

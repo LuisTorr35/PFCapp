@@ -15,7 +15,7 @@ class ElmSimulado(
     val modoUno: MutableMap<Int, String> = mutableMapOf(),
     val respuestas: MutableMap<String, ArrayDeque<String>> = mutableMapOf(),
     /** Emisor de las respuestas de modo 01: "7E8" en CAN 11 bits, "48 6B 11" en línea K. */
-    val cabecera: String = "7E8",
+    val cabecera: String = "7E8"
 ) {
     val esCan: Boolean get() = numeroProtocolo !in listOf("1", "2", "3", "4", "5")
     var protocoloPedido: String? = null
@@ -42,21 +42,29 @@ class ElmSimulado(
         }
         return when {
             comando == "ATZ" -> "ELM327 v1.5"
+
             comando == "ATE0" -> "ATE0\rOK"
+
             comando.startsWith("ATSP") -> {
                 protocoloPedido = comando.removePrefix("ATSP")
                 "OK"
             }
+
             comando == "ATDPN" -> if (protocoloPedido == "0") "A$numeroProtocolo" else numeroProtocolo
+
             comando == "ATDP" -> if (protocoloPedido == "0") "AUTO, $nombreProtocolo" else nombreProtocolo
+
             comando.startsWith("AT") -> "OK"
+
             comando.startsWith("01") -> {
                 // modo rápido de python-OBD: "010C1" pide una sola trama
                 val pid = comando.substring(2, 4).toInt(16)
                 val datos = modoUno[pid] ?: return "NO DATA"
                 trama("41 %02X $datos".format(pid))
             }
+
             comando == "03" || comando == "07" -> trama(if (comando == "03") "43 00" else "47 00")
+
             else -> "NO DATA"
         }
     }
@@ -64,12 +72,14 @@ class ElmSimulado(
     /** Una trama simple con la cabecera del simulador (PCI en CAN, suma de control en línea K). */
     fun trama(datos: String): String {
         val b = datos.trim().split(" ")
-        return if (esCan) "$cabecera %02X %s".format(b.size, datos.trim())
-        else "$cabecera ${datos.trim()} %02X".format(sumaControl(cabecera, b))
+        return if (esCan) {
+            "$cabecera %02X %s".format(b.size, datos.trim())
+        } else {
+            "$cabecera ${datos.trim()} %02X".format(sumaControl(cabecera, b))
+        }
     }
 
-    private fun sumaControl(cab: String, datos: List<String>): Int =
-        (cab.split(" ") + datos).sumOf { it.toInt(16) } and 0xFF
+    private fun sumaControl(cab: String, datos: List<String>): Int = (cab.split(" ") + datos).sumOf { it.toInt(16) } and 0xFF
 }
 
 /** Transporte falso: entrega la respuesta del simulador seguida del prompt '>'. */
@@ -77,7 +87,7 @@ class TransporteFalso(
     private val elm: ElmSimulado,
     /** Tras este número de comandos el enlace se cae: leer() informa read() == −1. */
     private val caerTras: Int = Int.MAX_VALUE,
-    private val fallaAlAbrir: Boolean = false,
+    private val fallaAlAbrir: Boolean = false
 ) : TransporteSerie {
     override val descripcion = "transporte falso"
     val comandos = ArrayList<String>()
@@ -142,8 +152,8 @@ fun elmTucson(): ElmSimulado = ElmSimulado(
         0x42 to "36 2A",
         0x0D to "00",
         0x2E to "10",
-        0x46 to "37",
-    ),
+        0x46 to "37"
+    )
 ).apply {
     responderSecuencia("0100", "SEARCHING...\r7E8 06 41 00 BE 3F A8 13 00", trama("41 00 BE 3F A8 13"))
 }
