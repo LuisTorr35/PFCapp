@@ -14,6 +14,9 @@ data class DispositivoBT(val nombre: String, val direccionMac: String)
 /** Adaptadores ya vinculados en Ajustes. Requiere BLUETOOTH_CONNECT en Android 12+. */
 object DispositivosBluetooth {
 
+    /** true si el teléfono tiene Bluetooth (encendido o no). */
+    fun existe(contexto: Context): Boolean = adaptador(contexto) != null
+
     /** true si el teléfono tiene Bluetooth y está encendido. */
     @SuppressLint("MissingPermission")
     fun disponible(contexto: Context): Boolean {
