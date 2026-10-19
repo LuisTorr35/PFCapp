@@ -282,6 +282,34 @@ class BaseDatosLocalTest {
         assertEquals("2026-09-28T11:20:00", atenciones.obtener(id)!!.atencion.fecha)
     }
 
+    @Test
+    fun laBaseDeLaVersion1SeReemplazaPorLaDeRoom() {
+        base.close()
+        contexto.deleteDatabase(NOMBRE)
+        // Una base de la versión 1 (SQLiteOpenHelper, sin room_master_table) con un vehículo.
+        val archivo = contexto.getDatabasePath(NOMBRE)
+        archivo.parentFile?.mkdirs()
+        SQLiteDatabase.openOrCreateDatabase(archivo, null).use { db ->
+            db.execSQL(
+                "CREATE TABLE vehiculo (id_vehiculo INTEGER PRIMARY KEY, codigo TEXT NOT NULL UNIQUE, " +
+                    "marca TEXT NOT NULL, modelo TEXT NOT NULL, anio INTEGER NOT NULL, cilindros INTEGER NOT NULL, " +
+                    "familia_gestion TEXT)",
+            )
+            db.execSQL("INSERT INTO vehiculo (codigo, marca, modelo, anio, cilindros) VALUES ('VEH-007', 'Kia', 'Rio', 2015, 4)")
+            db.version = 1
+        }
+
+        base = BaseDatosLocal.crear(contexto, NOMBRE)
+        vehiculos = RepositorioVehiculos(base)
+        assertTrue("La versión 1 se descarta sin migrar", vehiculos.listar().isEmpty())
+        assertEquals("VEH-001", vehiculos.registrar("Hyundai", "Tucson", 2011, 4).codigo)
+        sql.query("PRAGMA user_version").use { c -> c.moveToFirst(); assertEquals(BaseDatosLocal.VERSION, c.getInt(0)) }
+        sql.query("SELECT COUNT(*) FROM sqlite_master WHERE type = 'trigger'").use { c ->
+            c.moveToFirst()
+            assertEquals(RestriccionesCheck.NOMBRES_TRIGGERS.size, c.getInt(0))
+        }
+    }
+
     // ---------- Datos de prueba ----------
 
     private fun contar(tabla: String): Int =
