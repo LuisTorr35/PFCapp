@@ -39,6 +39,18 @@ class ValidacionCorteTest {
     }
 
     @Test
+    fun atn026UsaLaMapDelContactoComoBarometrica() {
+        // Hyundai Accent 2000 por línea K: no expone el PID 0x33; la MAP con el motor
+        // apagado del contacto (77 kPa) hace de barométrica y la regla 9 se cumple.
+        val at = Recursos.lector.leer("ATN-026")
+        assertEquals(null, at.baroKpa)
+        assertEquals(77.0, at.mapContactoKpa!!, 0.0)
+        assertTrue(at.barometricaDesdeMap)
+        val r9 = validador.validar(at).reglas.single { it.numero == 9 }
+        assertEquals("CUMPLE", r9.efecto.name)
+    }
+
+    @Test
     fun ningunaDelCorteSaleRechazada() {
         val rechazadas = Recursos.CORTE.mapNotNull { id ->
             val d = validador.validar(Recursos.lector.leer(id))

@@ -279,6 +279,31 @@ class ReglasValidacionTest {
         assertEquals(ResultadoDictamen.PARCIAL, validador.validar(buena(baro = 101.0)).resultado)
     }
 
+    @Test
+    fun regla9UsaLaMapDelContactoSiNoHayBarometrica() {
+        // sin PID 0x33, la MAP con el motor apagado es la barométrica de la sesión
+        val conMap = buena(baro = null, mapContacto = 77.0)
+        val r = regla(9).evaluar(conMap)
+        assertEquals(EfectoRegla.CUMPLE, r.efecto)
+        assertTrue(r.motivo, r.motivo.contains("MAP con el motor apagado"))
+        assertEquals(77.0, conMap.barometricaSesion!!, 0.0)
+        // si hay PID 0x33, manda el PID aunque también haya MAP
+        assertEquals(EfectoRegla.DEGRADA, regla(9).evaluar(buena(baro = 101.0, mapContacto = 76.0)).efecto)
+    }
+
+    @Test
+    fun regla9DegradaSiLaMapDelContactoTambienFaltaOQuedaFueraDeRango() {
+        val sinNada = regla(9).evaluar(buena(baro = null, mapContacto = null))
+        assertEquals(EfectoRegla.DEGRADA, sinNada.efecto)
+        assertTrue(sinNada.motivo, sinNada.motivo.contains("ni hay MAP"))
+        // MAP leída con el motor ya encendido (vacío del múltiple, como en VEH-004)
+        val motorEncendido = regla(9).evaluar(buena(baro = null, mapContacto = 35.0))
+        assertEquals(EfectoRegla.DEGRADA, motorEncendido.efecto)
+        assertTrue(motorEncendido.motivo, motorEncendido.motivo.contains("fuera de rango"))
+        assertTrue(motorEncendido.motivo, motorEncendido.motivo.contains("MAP con el motor apagado"))
+        assertEquals(EfectoRegla.DEGRADA, regla(9).evaluar(buena(baro = null, mapContacto = 101.0)).efecto)
+    }
+
     // Dictamen ----------------------------------------------------------------
 
     @Test

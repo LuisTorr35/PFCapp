@@ -213,7 +213,8 @@ class ProtocoloELM327Test {
         assertEquals("3", a.protocoloMemorizado)
         assertEquals(FamiliaGestion.MAP, r.familiaGestion)
         assertEquals(listOf("ATSP0", "ATSP3"), t.comandos.filter { it.startsWith("ATSP") })
-        assertEquals(77.0, a.leerBarometrica()!!, 0.0) // sin PID 0x33: la MAP con el motor apagado
+        assertEquals(null, a.leerBarometrica()) // el vehículo no expone el PID 0x33
+        assertEquals(77.0, a.leerMapContacto()!!, 0.0) // la MAP con el motor apagado hace de barométrica
         val l = a.leerParametros(TipoRegimen.R2).take(1).toList().single()
         assertEquals(800.0, l.rpm!!, 0.0)
         assertEquals(51.0, l.tempRefrigerante!!, 0.0)
