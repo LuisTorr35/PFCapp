@@ -136,19 +136,23 @@ class ServicioAdquisicionImpl(
         val codigos = conReconexion("leer los códigos") { ad.leerCodigos() }
         val modo06 = conReconexion("leer el modo 06") { ad.leerContadoresModo06() }
         val baro = conReconexion("leer la barométrica") { ad.leerBarometrica() }
+        val mapContacto = conReconexion("leer la MAP con el motor apagado") { ad.leerMapContacto() }
+        val baroSesion = baro ?: mapContacto
         val ectInicial = conReconexion("leer el refrigerante") { ad.leerTemperaturaRefrigerante() }
         _estado.update {
-            it.copy(lecturaInicialHecha = true, codigos = codigos, contadoresModo06 = modo06, baroKpa = baro)
+            it.copy(lecturaInicialHecha = true, codigos = codigos, contadoresModo06 = modo06, baroKpa = baroSesion)
         }
         Registro.i(
             Registro.CAPTURA,
-            "Lectura inicial: ${codigos.size} códigos, ${modo06.size} cilindros en modo 06, barométrica $baro kPa, " +
+            "Lectura inicial: ${codigos.size} códigos, ${modo06.size} cilindros en modo 06, barométrica " +
+                (if (baro != null) "$baro kPa (PID 0x33)" else "$mapContacto kPa (MAP con el motor apagado)") + ", " +
                 "refrigerante $ectInicial °C",
         )
         atencionActual = Atencion(
             idVehiculo = vehiculo.id,
             fecha = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ROOT).format(Date(reloj())),
             baroKpa = baro,
+            mapContactoKpa = mapContacto,
             protocolo = conexion.protocolo,
             codigos = codigos,
             contadoresModo06 = modo06,

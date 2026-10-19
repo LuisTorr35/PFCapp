@@ -69,20 +69,28 @@ data class ContadorModo06(
 /**
  * La atención: registro completo de una sesión de medición sobre un vehículo.
  * [regimenes] contiene solo los regímenes capturados (R1 puede faltar).
- * [baroKpa] es la presión barométrica de la sesión (PID 0x33, o la presión del
- * múltiple con el motor apagado si el vehículo no expone la barométrica).
+ * [baroKpa] es la presión barométrica que entrega el vehículo (PID 0x33) y
+ * [mapContactoKpa] la presión del múltiple leída con el motor apagado en el contacto,
+ * que es atmosférica. [barometricaSesion] usa la segunda si falta la primera (regla 9).
  */
 data class Atencion(
     val id: Long = 0,
     val idVehiculo: Long,
     val fecha: String,
     val baroKpa: Double? = null,
+    val mapContactoKpa: Double? = null,
     val protocolo: String? = null,
     val codigos: List<CodigoDTC> = emptyList(),
     val contadoresModo06: List<ContadorModo06> = emptyList(),
     val regimenes: Map<TipoRegimen, Regimen> = emptyMap(),
 ) {
     fun regimen(tipo: TipoRegimen): Regimen? = regimenes[tipo]
+
+    /** Barométrica de la sesión: el PID 0x33 o, si el vehículo no lo expone, la MAP del contacto. */
+    val barometricaSesion: Double? get() = baroKpa ?: mapContactoKpa
+
+    /** true si la barométrica de la sesión salió de la MAP con el motor apagado. */
+    val barometricaDesdeMap: Boolean get() = baroKpa == null && mapContactoKpa != null
 
     fun agregarRegimen(r: Regimen): Atencion = copy(regimenes = regimenes + (r.tipo to r))
 

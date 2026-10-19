@@ -38,6 +38,7 @@ class LectorCsvAtencion(
             idVehiculo = idVehiculo,
             fecha = fecha(idAtencion),
             baroKpa = barometrica(idAtencion),
+            mapContactoKpa = mapContacto(idAtencion),
             protocolo = protocolo(idAtencion),
             codigos = leerCodigos(idAtencion),
             contadoresModo06 = leerModo06(idAtencion),
@@ -47,7 +48,8 @@ class LectorCsvAtencion(
             Registro.PROCESAMIENTO,
             "Leída $idAtencion de $fuente: " +
                 regimenes.values.joinToString { "${it.tipo} ${it.lecturas.size} filas/${it.muestrasUtiles} útiles" } +
-                ", ${atencion.codigos.size} códigos, barométrica ${atencion.baroKpa}",
+                ", ${atencion.codigos.size} códigos, barométrica ${atencion.baroKpa}, " +
+                "MAP del contacto ${atencion.mapContactoKpa}",
         )
         return atencion
     }
@@ -125,9 +127,9 @@ class LectorCsvAtencion(
             ?: leerSesion(idAtencion)["Fecha y hora"].orEmpty()
 
     /**
-     * Barométrica de la sesión, en el mismo orden que registrar_obd.py: la del
-     * contacto (PID 0x33); si falta, la constante de sesión de las filas del
-     * régimen; si tampoco, la presión del múltiple con el motor apagado.
+     * Barométrica que entregó el vehículo (PID 0x33): la del contacto o, si falta, la
+     * constante de sesión de las filas del régimen. La MAP con el motor apagado va
+     * aparte, en [mapContacto].
      */
     fun barometrica(idAtencion: String): Double? {
         val contacto = leerContacto(idAtencion)
@@ -137,8 +139,11 @@ class LectorCsvAtencion(
             val i = MapaColumnas.mapear(t.encabezados)["baro_kpa"] ?: continue
             t.filas.firstNotNullOfOrNull { MapaColumnas.aNumero(it.getOrNull(i)) }?.let { return it }
         }
-        return MapaColumnas.aNumero(contacto["map_koeo_kpa"])
+        return null
     }
+
+    /** Presión del múltiple con el motor apagado, del contacto (map_koeo_kpa). */
+    fun mapContacto(idAtencion: String): Double? = MapaColumnas.aNumero(leerContacto(idAtencion)["map_koeo_kpa"])
 
     /**
      * Familia de gestión: por la máscara de _pids.csv (MAF e INTAKE_PRESSURE), por

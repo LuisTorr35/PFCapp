@@ -72,10 +72,12 @@ object AtencionesSinteticas {
         r2: Regimen? = ralenti(TipoRegimen.R2),
         r3: Regimen? = aceleraciones(),
         baro: Double? = 74.0,
+        mapContacto: Double? = null,
     ): Atencion = Atencion(
         idVehiculo = 1,
         fecha = "2026-10-19 10:00",
         baroKpa = baro,
+        mapContactoKpa = mapContacto,
         regimenes = listOfNotNull(r1, r2, r3).associateBy { it.tipo },
     )
 }
