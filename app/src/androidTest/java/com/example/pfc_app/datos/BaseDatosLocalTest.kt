@@ -3,6 +3,8 @@ package com.example.pfc_app.datos
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
+import android.database.sqlite.SQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pfc_app.modelos.Atencion
@@ -29,7 +31,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Pruebas de la base local (Tabla 30): códigos, transacción, historial, FK, CHECK y regla 8. */
+/** Pruebas de la base local Room (Tabla 30): códigos, transacción, historial, FK, CHECK y regla 8. */
 @RunWith(AndroidJUnit4::class)
 class BaseDatosLocalTest {
     private lateinit var contexto: Context
@@ -37,11 +39,14 @@ class BaseDatosLocalTest {
     private lateinit var vehiculos: RepositorioVehiculos
     private lateinit var atenciones: RepositorioAtenciones
 
+    /** Acceso SQL directo a la misma base, para probar las restricciones sin pasar por los DAO. */
+    private val sql: SupportSQLiteDatabase get() = base.openHelper.writableDatabase
+
     @Before
     fun preparar() {
         contexto = InstrumentationRegistry.getInstrumentation().targetContext
         contexto.deleteDatabase(NOMBRE)
-        base = BaseDatosLocal(contexto, NOMBRE)
+        base = BaseDatosLocal.crear(contexto, NOMBRE)
         vehiculos = RepositorioVehiculos(base)
         atenciones = RepositorioAtenciones(base)
     }
@@ -132,7 +137,7 @@ class BaseDatosLocalTest {
         assertEquals(Direccion.MENOR, d.parametrosDesviados[1].direccion)
 
         // Fila cruda: el NULL se guarda como NULL.
-        base.readableDatabase.rawQuery("SELECT COUNT(*) FROM lectura WHERE maf IS NULL", null).use { c ->
+        sql.query("SELECT COUNT(*) FROM lectura WHERE maf IS NULL").use { c ->
             c.moveToFirst()
             assertEquals(9, c.getInt(0))
         }
@@ -177,7 +182,7 @@ class BaseDatosLocalTest {
     fun clavesForaneasRechazanFilasHuerfanas() {
         // Lectura de un régimen que no existe.
         assertConstraint {
-            base.writableDatabase.insertOrThrow("lectura", null, ContentValues().apply {
+            sql.insert("lectura", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
                 put("id_regimen", 999)
                 put("instante", 0.0)
             })
@@ -187,7 +192,7 @@ class BaseDatosLocalTest {
         assertEquals(0, contar("atencion"))
         // Parámetro desviado de un diagnóstico que no existe.
         assertConstraint {
-            base.writableDatabase.insertOrThrow("parametro_desviado", null, ContentValues().apply {
+            sql.insert("parametro_desviado", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
                 put("id_diagnostico", 77)
                 put("parametro", "R2_rpm_desv")
                 put("valor", 1.0)
@@ -200,40 +205,40 @@ class BaseDatosLocalTest {
     fun checkRechazanValoresInvalidos() {
         val v = vehiculos.registrar("Hyundai", "Tucson", 2011, 4)
         val idAtencion = atenciones.guardar(atencionDePrueba(v.id, "2026-09-28T11:20:00"), dictamenCompleta(), diagnosticoDePrueba())
-        val db = base.writableDatabase
+        val db = sql
 
         // vehiculo: familia y código fuera de lo permitido.
         assertConstraint { db.execSQL("UPDATE vehiculo SET familia_gestion = 'XYZ' WHERE id_vehiculo = ${v.id}") }
         assertConstraint {
-            db.insertOrThrow("vehiculo", null, ContentValues().apply {
+            db.insert("vehiculo", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
                 put("codigo", "ABC"); put("marca", "X"); put("modelo", "Y"); put("anio", 2010); put("cilindros", 4)
             })
         }
         // Código repetido.
         assertConstraint {
-            db.insertOrThrow("vehiculo", null, ContentValues().apply {
+            db.insert("vehiculo", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
                 put("codigo", v.codigo); put("marca", "X"); put("modelo", "Y"); put("anio", 2010); put("cilindros", 4)
             })
         }
         // regimen.tipo solo R1, R2 o R3.
         assertConstraint {
-            db.insertOrThrow("regimen", null, ContentValues().apply { put("id_atencion", idAtencion); put("tipo", "R4") })
+            db.insert("regimen", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply { put("id_atencion", idAtencion); put("tipo", "R4") })
         }
         // codigo_dtc.tipo solo almacenado o pendiente.
         assertConstraint {
-            db.insertOrThrow("codigo_dtc", null, ContentValues().apply {
+            db.insert("codigo_dtc", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
                 put("id_atencion", idAtencion); put("codigo", "P0300"); put("tipo", "permanente")
             })
         }
         // dictamen: rechazada no se guarda y hay uno solo por atención.
         assertConstraint { db.execSQL("UPDATE dictamen SET resultado = 'rechazada' WHERE id_atencion = $idAtencion") }
         assertConstraint {
-            db.insertOrThrow("dictamen", null, ContentValues().apply { put("id_atencion", idAtencion); put("resultado", "parcial") })
+            db.insert("dictamen", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply { put("id_atencion", idAtencion); put("resultado", "parcial") })
         }
         // diagnostico: probabilidad entre 0 y 1 y uno solo por atención.
         assertConstraint { db.execSQL("UPDATE diagnostico SET probabilidad = -0.1 WHERE id_atencion = $idAtencion") }
         assertConstraint {
-            db.insertOrThrow("diagnostico", null, ContentValues().apply {
+            db.insert("diagnostico", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
                 put("id_atencion", idAtencion); put("clase", "C2"); put("probabilidad", 0.5); put("version_modelo", "x")
             })
         }
@@ -280,7 +285,7 @@ class BaseDatosLocalTest {
     // ---------- Datos de prueba ----------
 
     private fun contar(tabla: String): Int =
-        base.readableDatabase.rawQuery("SELECT COUNT(*) FROM $tabla", null).use { c -> c.moveToFirst(); c.getInt(0) }
+        sql.query("SELECT COUNT(*) FROM $tabla").use { c -> c.moveToFirst(); c.getInt(0) }
 
     private fun assertConstraint(bloque: () -> Unit) {
         try {

@@ -43,9 +43,24 @@ class AppContenedor(contexto: Context) {
     /** Alcance de la aplicación, para tareas que deben terminar aunque se cierre una pantalla. */
     val alcance: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    val baseDatos: BaseDatosLocal by lazy { BaseDatosLocal(this.contexto) }
-    val repositorioVehiculos: RepositorioVehiculos by lazy { RepositorioVehiculos(baseDatos) }
-    val repositorioAtenciones: RepositorioAtenciones by lazy { RepositorioAtenciones(baseDatos) }
+    /** La base Room y sus repositorios. Una base Room cerrada no se reabre: se crea otra. */
+    private class Datos(val base: BaseDatosLocal) {
+        val vehiculos = RepositorioVehiculos(base)
+        val atenciones = RepositorioAtenciones(base)
+    }
+
+    private val candadoDatos = Any()
+
+    @Volatile private var datosAbiertos: Datos? = null
+
+    private fun datos(): Datos =
+        datosAbiertos ?: synchronized(candadoDatos) {
+            datosAbiertos ?: Datos(BaseDatosLocal.crear(this.contexto)).also { datosAbiertos = it }
+        }
+
+    val baseDatos: BaseDatosLocal get() = datos().base
+    val repositorioVehiculos: RepositorioVehiculos get() = datos().vehiculos
+    val repositorioAtenciones: RepositorioAtenciones get() = datos().atenciones
     val preferencias: PreferenciasApp by lazy { PreferenciasApp(this.contexto) }
 
     /** Modelo ONNX y su contrato, leídos de assets/modelo la primera vez que se piden. */
@@ -105,7 +120,10 @@ class AppContenedor(contexto: Context) {
 
     /** Cierra y borra la base de datos (lo usan las pruebas para empezar limpias). */
     fun borrarBaseDatos() {
-        baseDatos.close()
+        synchronized(candadoDatos) {
+            datosAbiertos?.base?.close()
+            datosAbiertos = null
+        }
         contexto.deleteDatabase(BaseDatosLocal.NOMBRE)
         Registro.w(Registro.DATOS, "Base de datos borrada")
     }
