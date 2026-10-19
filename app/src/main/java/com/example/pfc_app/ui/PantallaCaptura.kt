@@ -101,6 +101,27 @@ fun PantallaCaptura(
         PieCaptura(estado, vm)
     }
 
+    if (estado.guardadaSinDiagnostico) {
+        // CU-05 E2: la atención ya quedó en el historial; solo se informa y se pasa a él.
+        AlertDialog(
+            onDismissRequest = {},
+            modifier = Modifier.testTag(EtiquetasPrueba.DIALOGO_GUARDADA_SIN_DIAGNOSTICO),
+            title = { Text("Atención guardada sin diagnóstico") },
+            text = {
+                Text(
+                    "El vehículo no expone los parámetros que requiere el modelo. " +
+                        "La atención quedó guardada en el historial del vehículo sin diagnóstico.",
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = vm::aceptarSinDiagnostico,
+                    modifier = Modifier.testTag(EtiquetasPrueba.BOTON_ACEPTAR_SIN_DIAGNOSTICO),
+                ) { Text("Aceptar", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) }
+            },
+        )
+    }
+
     if (confirmarSalida) {
         AlertDialog(
             onDismissRequest = { confirmarSalida = false },
@@ -234,7 +255,7 @@ private fun TarjetaDictamen(estado: EstadoPantallaCaptura) {
                 Spacer(Modifier.size(2.dp))
                 Text(
                     "El vehículo no expone los parámetros que pide el modelo. " +
-                        "La atención se puede guardar en el historial sin diagnóstico.",
+                        "Al pulsar «Diagnosticar», la atención se guardará en el historial sin diagnóstico.",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -251,7 +272,7 @@ private fun TarjetaDictamen(estado: EstadoPantallaCaptura) {
     }
 }
 
-/** Pie fijo: instrucción con "Continuar", "Guardar sin diagnóstico" y "Diagnosticar". */
+/** Pie fijo: instrucción con "Continuar" y "Diagnosticar". */
 @Composable
 private fun PieCaptura(estado: EstadoPantallaCaptura, vm: CapturaViewModel) {
     val c = estado.captura
@@ -285,14 +306,6 @@ private fun PieCaptura(estado: EstadoPantallaCaptura, vm: CapturaViewModel) {
                 Spacer(Modifier.width(10.dp))
                 TextoSecundario(ocupado)
             }
-        }
-        if (estado.puedeGuardarSinDiagnostico || (estado.sinDiagnostico && estado.fase == FaseCaptura.GUARDANDO)) {
-            BotonPrincipal(
-                "Guardar sin diagnóstico",
-                vm::guardarSinDiagnostico,
-                Modifier.testTag(EtiquetasPrueba.BOTON_GUARDAR_SIN_DIAGNOSTICO),
-                habilitado = estado.puedeGuardarSinDiagnostico,
-            )
         }
         BotonPrincipal(
             "Diagnosticar",

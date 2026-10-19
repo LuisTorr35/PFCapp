@@ -45,7 +45,8 @@ object EtiquetasPrueba {
     const val TARJETA_ERROR = "tarjeta_error"
     const val TARJETA_DICTAMEN = "tarjeta_dictamen"
     const val BOTON_DIAGNOSTICAR = "boton_diagnosticar"
-    const val BOTON_GUARDAR_SIN_DIAGNOSTICO = "boton_guardar_sin_diagnostico"
+    const val DIALOGO_GUARDADA_SIN_DIAGNOSTICO = "dialogo_guardada_sin_diagnostico"
+    const val BOTON_ACEPTAR_SIN_DIAGNOSTICO = "boton_aceptar_sin_diagnostico"
 
     // Diagnóstico (CU-07)
     const val NOMBRE_CLASE = "nombre_clase"

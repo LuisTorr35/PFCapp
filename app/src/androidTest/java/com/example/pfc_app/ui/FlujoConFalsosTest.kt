@@ -1,5 +1,6 @@
 package com.example.pfc_app.ui
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -7,6 +8,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -127,8 +129,17 @@ class FlujoConFalsosTest {
         pasos.esperarDictamen("completa", 20_000)
         compose.onNodeWithTag(E.TARJETA_DICTAMEN)
             .assertTextContains("El vehículo no expone los parámetros que pide el modelo", substring = true)
-        compose.onNodeWithTag(E.BOTON_DIAGNOSTICAR).assertIsNotEnabled()
-        compose.onNodeWithTag(E.BOTON_GUARDAR_SIN_DIAGNOSTICO).assertIsEnabled().performClick()
+        // CU-05: no hay botón para guardar a mano; al diagnosticar se guarda sola (E1)
+        // y se avisa con "Aceptar", que lleva al historial (E2).
+        compose.onAllNodesWithText("Guardar sin diagnóstico").assertCountEquals(0)
+        compose.onNodeWithTag(E.BOTON_DIAGNOSTICAR).assertIsEnabled().performClick()
+        pasos.esperar(10_000, "aviso de guardada sin diagnóstico") {
+            pasos.existe(hasTestTag(E.DIALOGO_GUARDADA_SIN_DIAGNOSTICO))
+        }
+        compose.onNodeWithTag(E.DIALOGO_GUARDADA_SIN_DIAGNOSTICO)
+            .assertTextContains("no expone los parámetros que requiere el modelo", substring = true)
+        assertEquals(1, contenedor.repositorioAtenciones.listarPorVehiculo(1).size)
+        compose.onNodeWithTag(E.BOTON_ACEPTAR_SIN_DIAGNOSTICO).performClick()
 
         pasos.esperar(10_000, "historial") { pasos.existe(hasTestTag(E.FILA_ATENCION)) }
         compose.onNodeWithTag(E.AVISO_HISTORIAL).assertTextContains("sin diagnóstico", substring = true)
