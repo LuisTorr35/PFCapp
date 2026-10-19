@@ -1,10 +1,13 @@
 package com.example.pfc_app.adquisicion
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import com.example.pfc_app.Registro
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -52,11 +55,16 @@ class TransporteBluetooth(
                 throw AdaptadorNoEncontradoException("El Bluetooth del teléfono está apagado. Enciéndalo y vuelva a intentar.")
             }
             val dispositivo = adaptador.getRemoteDevice(direccionMac)
-            // el descubrimiento en curso hace muy lenta y poco fiable la conexión RFCOMM
-            try {
-                adaptador.cancelDiscovery()
-            } catch (e: SecurityException) {
-                Registro.w(Registro.BT, "No se pudo cancelar el descubrimiento (falta BLUETOOTH_SCAN): ${e.message}")
+            // El descubrimiento en curso hace muy lenta la conexión RFCOMM. Cancelarlo exige
+            // BLUETOOTH_SCAN desde Android 12, y la app no escanea: sin ese permiso no se intenta.
+            if (puedeCancelarDescubrimiento()) {
+                try {
+                    adaptador.cancelDiscovery()
+                } catch (e: SecurityException) {
+                    Registro.w(Registro.BT, "No se pudo cancelar el descubrimiento: ${e.message}")
+                }
+            } else {
+                Registro.d(Registro.BT, "Sin BLUETOOTH_SCAN: no se cancela el descubrimiento (la app no escanea)")
             }
             val s = conectarSocket(dispositivo)
             socket = s
@@ -97,12 +105,22 @@ class TransporteBluetooth(
                 }
             }
         }
+        val nombre = try {
+            dispositivo.name?.takeIf(String::isNotBlank)
+        } catch (_: SecurityException) {
+            null
+        }
         throw AdaptadorNoEncontradoException(
-            "No se encuentra el adaptador ELM327 ($direccionMac). Revise que esté enchufado al conector OBD-II " +
-                "y vinculado con el teléfono.",
+            "No se pudo abrir el puerto serie con «${nombre ?: direccionMac}» ($direccionMac) tras 2 intentos. " +
+                "El dispositivo elegido no responde como adaptador ELM327: revise que sea el adaptador OBD-II, " +
+                "que esté enchufado al conector del vehículo con el contacto puesto y vinculado con el teléfono.",
             ultimo,
         )
     }
+
+    private fun puedeCancelarDescubrimiento(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            contexto.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
 
     private fun iniciarLector(flujo: InputStream) {
         hiloLector = Thread({
