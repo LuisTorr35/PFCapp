@@ -53,16 +53,19 @@ data class EstadoPantallaCaptura(
     val regimenEnRepeticion: TipoRegimen? = null,
     /** El vehículo no expone los parámetros que pide el modelo (regla 8) o el modelo no pudo predecir. */
     val sinDiagnostico: Boolean = false,
+    /** CU-05 E1 y E2: la atención ya se guardó sola sin diagnóstico y se muestra el aviso con "Aceptar". */
+    val guardadaSinDiagnostico: Boolean = false,
     /** Error que detuvo la atención (no se pudo conectar, por ejemplo). */
     val error: String? = null,
     /** Aviso que no detiene la atención (falló una repetición o el diagnóstico). */
     val aviso: String? = null,
 ) {
+    /**
+     * "Diagnosticar" se habilita con dictamen completa o parcial. Si el vehículo no expone
+     * los parámetros del modelo, al pulsarlo la atención se guarda sola sin diagnóstico (CU-05 E1).
+     */
     val puedeDiagnosticar: Boolean
-        get() = fase == FaseCaptura.LISTA && dictamen?.permiteInferencia() == true && !sinDiagnostico
-
-    val puedeGuardarSinDiagnostico: Boolean
-        get() = fase == FaseCaptura.LISTA && dictamen?.permiteGuardar() == true && sinDiagnostico
+        get() = fase == FaseCaptura.LISTA && dictamen?.permiteGuardar() == true
 
     val puedeRepetir: Boolean
         get() = fase == FaseCaptura.LISTA && dictamen?.resultado == ResultadoDictamen.RECHAZADA
@@ -217,6 +220,11 @@ class CapturaViewModel(
         val v = e.vehiculo ?: return
         if (!e.puedeDiagnosticar) return
         Registro.i(Registro.UI, "Diagnosticar ${v.codigo}")
+        if (d.faltanParametrosModelo) {
+            // CU-05 paso 1 y E1: el vehículo no expone los parámetros que requiere el modelo.
+            guardarSinDiagnostico(a, d, v)
+            return
+        }
         _estado.update { it.copy(fase = FaseCaptura.DIAGNOSTICANDO, aviso = null) }
         viewModelScope.launch {
             intentar({ t ->
@@ -229,7 +237,7 @@ class CapturaViewModel(
                 Registro.i(Registro.UI, "Inferencia en ${System.currentTimeMillis() - inicio} ms: ${diagnostico?.clase ?: "sin diagnóstico"}")
                 if (diagnostico == null) {
                     // A la fila le falta alguna característica: se trata como la regla 8 (CU-05 E1).
-                    _estado.update { it.copy(fase = FaseCaptura.LISTA, sinDiagnostico = true) }
+                    guardarSinDiagnostico(a, d, v)
                 } else {
                     contenedor.sesion.iniciar(AtencionEnCurso(v, a, d, diagnostico))
                     _estado.update { it.copy(fase = FaseCaptura.LISTA) }
@@ -239,26 +247,32 @@ class CapturaViewModel(
         }
     }
 
-    /** CU-05 E1: guarda la atención sin diagnóstico y abre el historial. */
-    fun guardarSinDiagnostico() {
-        val e = _estado.value
-        val a = atencion ?: return
-        val d = e.dictamen ?: return
-        val v = e.vehiculo ?: return
-        if (!e.puedeGuardarSinDiagnostico) return
-        _estado.update { it.copy(fase = FaseCaptura.GUARDANDO, aviso = null) }
+    /**
+     * CU-05 E1: el sistema guarda la atención en el historial sin diagnóstico, por su cuenta.
+     * Luego E2: la pantalla avisa que el vehículo no expone los parámetros que requiere el
+     * modelo, con "Aceptar" ([aceptarSinDiagnostico]) que lleva al historial.
+     */
+    private fun guardarSinDiagnostico(a: Atencion, d: Dictamen, v: Vehiculo) {
+        _estado.update { it.copy(fase = FaseCaptura.GUARDANDO, sinDiagnostico = true, aviso = null) }
         viewModelScope.launch {
             intentar({ t ->
-                Registro.e(Registro.UI, "No se pudo guardar la atención", t)
+                Registro.e(Registro.UI, "No se pudo guardar la atención sin diagnóstico", t)
                 _estado.update { it.copy(fase = FaseCaptura.LISTA, aviso = "No se pudo guardar la atención: ${t.mensajeLegible()}") }
             }) {
                 val id = withContext(Dispatchers.IO) { contenedor.repositorioAtenciones.guardar(a, d, null) }
-                Registro.i(Registro.UI, "Atención $id guardada sin diagnóstico")
+                Registro.i(Registro.UI, "Atención $id de ${v.codigo} guardada sin diagnóstico (CU-05 E1)")
                 contenedor.sesion.limpiar()
-                _estado.update { it.copy(fase = FaseCaptura.GUARDADA) }
-                canalEventos.send(EventoCaptura.AbrirHistorial(v.id, AVISO_SIN_DIAGNOSTICO))
+                _estado.update { it.copy(fase = FaseCaptura.GUARDADA, guardadaSinDiagnostico = true) }
             }
         }
+    }
+
+    /** CU-05 E2: el mecánico acepta el aviso y pasa al historial del vehículo. */
+    fun aceptarSinDiagnostico() {
+        val v = _estado.value.vehiculo ?: return
+        if (!_estado.value.guardadaSinDiagnostico) return
+        _estado.update { it.copy(guardadaSinDiagnostico = false) }
+        viewModelScope.launch { canalEventos.send(EventoCaptura.AbrirHistorial(v.id, AVISO_SIN_DIAGNOSTICO)) }
     }
 
     private fun fallar(titulo: String, t: Throwable) {
