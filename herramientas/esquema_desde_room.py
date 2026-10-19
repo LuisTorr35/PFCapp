@@ -37,7 +37,8 @@ RESTRICCIONES = RAIZ / "app" / "src" / "main" / "java" / "com" / "example" / "pf
 SALIDA = ESQUEMAS / "schema.sql"
 
 # Una entrada de RestriccionesCheck.CHECKS: Check("tabla", "columna", "condición con NEW.columna"),
-PATRON_CHECK = re.compile(r'^\s*Check\("(\w+)", "(\w+)", "([^"\\$]*)"\),\s*$', re.MULTILINE)
+# La coma final es opcional: el estilo de ktlint la quita en el último elemento de la lista.
+PATRON_CHECK = re.compile(r'^\s*Check\("(\w+)", "(\w+)", "([^"\\$]*)"\),?\s*$', re.MULTILINE)
 
 
 def json_de_room(version: int | None) -> Path:
