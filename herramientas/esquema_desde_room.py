@@ -178,8 +178,12 @@ def main() -> int:
     creados = objetos(esquema)
     tipos = {t: sum(1 for k in creados if k[0] == t and not k[1].startswith("sqlite_"))
              for t in ("table", "index", "trigger")}
-    SALIDA.write_text(esquema, encoding="utf-8", newline="\n")
-    print(f"{SALIDA.relative_to(RAIZ).as_posix()} desde {ruta_json.name}: "
+    # Sin cambios no se reescribe: git en Windows lo daría por modificado solo por los fines de línea.
+    anterior = SALIDA.read_text(encoding="utf-8").replace("\r\n", "\n") if SALIDA.exists() else None
+    if anterior != esquema:
+        SALIDA.write_text(esquema, encoding="utf-8", newline="\n")
+    print(f"{SALIDA.relative_to(RAIZ).as_posix()} desde {ruta_json.name}"
+          f"{' (sin cambios)' if anterior == esquema else ''}: "
           f"{tipos['table']} tablas, {tipos['index']} índices y {tipos['trigger']} triggers")
     return comparar(esquema, args.comparar) if args.comparar else 0
 
