@@ -13,7 +13,7 @@ enum class ParametroLectura(
     val columnaLectura: String,
     val etiqueta: String,
     val agregado: Boolean,
-    val valor: (Lectura) -> Double?,
+    val valor: (Lectura) -> Double?
 ) {
     RPM("rpm", "rpm", "revoluciones", true, { it.rpm }),
     CARGA("carga_calc_pct", "carga_calculada", "carga calculada", true, { it.cargaCalculada }),

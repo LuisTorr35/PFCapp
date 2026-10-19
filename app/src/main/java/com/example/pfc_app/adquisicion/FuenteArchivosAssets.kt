@@ -8,12 +8,11 @@ import java.io.FileNotFoundException
 class FuenteArchivosAssets(private val contexto: Context, private val carpeta: String) : FuenteArchivos {
     private val ruta = carpeta.trim('/')
 
-    override fun leerBytes(nombre: String): ByteArray? =
-        try {
-            contexto.assets.open(if (ruta.isEmpty()) nombre else "$ruta/$nombre").use { it.readBytes() }
-        } catch (_: FileNotFoundException) {
-            null
-        }
+    override fun leerBytes(nombre: String): ByteArray? = try {
+        contexto.assets.open(if (ruta.isEmpty()) nombre else "$ruta/$nombre").use { it.readBytes() }
+    } catch (_: FileNotFoundException) {
+        null
+    }
 
     override fun lista(): List<String> = contexto.assets.list(ruta)?.sorted().orEmpty()
 

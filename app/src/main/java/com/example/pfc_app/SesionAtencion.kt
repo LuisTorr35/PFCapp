@@ -6,12 +6,7 @@ import com.example.pfc_app.modelos.Dictamen
 import com.example.pfc_app.modelos.Vehiculo
 
 /** La atención capturada y diagnosticada que todavía no se guarda en el historial. */
-data class AtencionEnCurso(
-    val vehiculo: Vehiculo,
-    val atencion: Atencion,
-    val dictamen: Dictamen,
-    val diagnostico: Diagnostico?,
-)
+data class AtencionEnCurso(val vehiculo: Vehiculo, val atencion: Atencion, val dictamen: Dictamen, val diagnostico: Diagnostico?)
 
 /** Guarda en memoria la atención en curso para que la pantalla Diagnóstico la muestre y la guarde. */
 class SesionAtencion {

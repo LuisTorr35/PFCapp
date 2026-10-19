@@ -22,7 +22,7 @@ import com.example.pfc_app.modelos.TipoRegimen
  */
 class LectorCsvAtencion(
     private val fuente: FuenteArchivos,
-    private val procesador: ProcesadorCaracteristicas = ProcesadorCaracteristicas(),
+    private val procesador: ProcesadorCaracteristicas = ProcesadorCaracteristicas()
 ) {
 
     /** La atención completa: regímenes contados, códigos, modo 06, barométrica y protocolo. */
@@ -42,21 +42,20 @@ class LectorCsvAtencion(
             protocolo = protocolo(idAtencion),
             codigos = leerCodigos(idAtencion),
             contadoresModo06 = leerModo06(idAtencion),
-            regimenes = regimenes,
+            regimenes = regimenes
         )
         Registro.d(
             Registro.PROCESAMIENTO,
             "Leída $idAtencion de $fuente: " +
                 regimenes.values.joinToString { "${it.tipo} ${it.lecturas.size} filas/${it.muestrasUtiles} útiles" } +
                 ", ${atencion.codigos.size} códigos, barométrica ${atencion.baroKpa}, " +
-                "MAP del contacto ${atencion.mapContactoKpa}",
+                "MAP del contacto ${atencion.mapContactoKpa}"
         )
         return atencion
     }
 
     /** Lecturas del régimen grabado, o null si no hay archivo. */
-    fun leerLecturas(idAtencion: String, tipo: TipoRegimen): List<Lectura>? =
-        tablaRegimen(idAtencion, tipo)?.let { lecturas(it) }
+    fun leerLecturas(idAtencion: String, tipo: TipoRegimen): List<Lectura>? = tablaRegimen(idAtencion, tipo)?.let { lecturas(it) }
 
     fun tieneRegimen(idAtencion: String, tipo: TipoRegimen): Boolean = fuente.existe(nombre(idAtencion, tipo.name))
 
@@ -65,8 +64,11 @@ class LectorCsvAtencion(
         val t = tabla(nombre(idAtencion, "DTC")) ?: return emptyList()
         return t.comoMapas().mapNotNull { f ->
             val codigo = f["codigo"]?.trim().orEmpty()
-            if (codigo.isEmpty()) null
-            else CodigoDTC(codigo, TipoDTC.desdeTexto(f["tipo"]), f["descripcion"]?.trim().orEmpty())
+            if (codigo.isEmpty()) {
+                null
+            } else {
+                CodigoDTC(codigo, TipoDTC.desdeTexto(f["tipo"]), f["descripcion"]?.trim().orEmpty())
+            }
         }
     }
 
@@ -118,13 +120,11 @@ class LectorCsvAtencion(
     }
 
     /** Protocolo del contacto o de la bitácora de sesión. */
-    fun protocolo(idAtencion: String): String? =
-        leerContacto(idAtencion)["protocolo"]?.takeIf { it.isNotBlank() }
-            ?: leerSesion(idAtencion)["Protocolo"]?.takeIf { it.isNotBlank() && it != "simulado" }
+    fun protocolo(idAtencion: String): String? = leerContacto(idAtencion)["protocolo"]?.takeIf { it.isNotBlank() }
+        ?: leerSesion(idAtencion)["Protocolo"]?.takeIf { it.isNotBlank() && it != "simulado" }
 
-    fun fecha(idAtencion: String): String =
-        leerContacto(idAtencion)["fecha_hora"]?.takeIf { it.isNotBlank() }
-            ?: leerSesion(idAtencion)["Fecha y hora"].orEmpty()
+    fun fecha(idAtencion: String): String = leerContacto(idAtencion)["fecha_hora"]?.takeIf { it.isNotBlank() }
+        ?: leerSesion(idAtencion)["Fecha y hora"].orEmpty()
 
     /**
      * Barométrica que entregó el vehículo (PID 0x33): la del contacto o, si falta, la
@@ -177,8 +177,7 @@ class LectorCsvAtencion(
 
     private fun lecturas(t: TablaCsv): List<Lectura> {
         val m = MapaColumnas.mapear(t.encabezados)
-        fun col(fila: List<String>, canonico: String): Double? =
-            m[canonico]?.let { MapaColumnas.aNumero(fila.getOrNull(it)) }
+        fun col(fila: List<String>, canonico: String): Double? = m[canonico]?.let { MapaColumnas.aNumero(fila.getOrNull(it)) }
         return t.filas.map { f ->
             Lectura(
                 instante = col(f, "t_seg") ?: Double.NaN,
@@ -190,7 +189,7 @@ class LectorCsvAtencion(
                 avanceEncendido = col(f, "avance_grados"),
                 maf = col(f, "maf_gps"),
                 map = col(f, "map_kpa"),
-                velocidad = col(f, "vel_kmh"),
+                velocidad = col(f, "vel_kmh")
             )
         }
     }

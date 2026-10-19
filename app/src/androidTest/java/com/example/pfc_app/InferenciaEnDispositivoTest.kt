@@ -38,7 +38,7 @@ class InferenciaEnDispositivoTest {
                     "${caso["id_atencion"]} probabilidad de ${clase.codigo}",
                     caso.getValue("prob_${clase.codigo}").toDouble(),
                     diagnostico.probabilidades.getValue(clase.codigo),
-                    1e-5,
+                    1e-5
                 )
             }
             assertEquals("${caso["id_atencion"]} clase", caso["clase_onnx"], diagnostico.clase)

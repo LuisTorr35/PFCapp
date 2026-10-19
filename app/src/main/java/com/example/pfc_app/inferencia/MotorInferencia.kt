@@ -55,17 +55,17 @@ class MotorInferencia(private val modelo: ModeloClasificacion) {
             probabilidades = probabilidades,
             parametrosDesviados = desviados,
             codigosLeidos = codigos,
-            modeloProvisional = contrato.provisional,
+            modeloProvisional = contrato.provisional
         )
         Registro.i(
             Registro.INFERENCIA,
-            "Fila ${nombres.zip(valores.toList()).joinToString { "${it.first}=${it.second}" }}",
+            "Fila ${nombres.zip(valores.toList()).joinToString { "${it.first}=${it.second}" }}"
         )
         Registro.i(
             Registro.INFERENCIA,
             "Probabilidades ${probabilidades.entries.joinToString { "${it.key}=${"%.4f".format(it.value)}" }}; " +
                 "clase ${clase.codigo} (${clase.nombre}); ${desviados.size} desviados; " +
-                "${"%.1f".format(ultimoTiempoMs)} ms; modelo ${contrato.versionModelo}",
+                "${"%.1f".format(ultimoTiempoMs)} ms; modelo ${contrato.versionModelo}"
         )
         return diagnostico
     }
@@ -93,7 +93,7 @@ class MotorInferencia(private val modelo: ModeloClasificacion) {
                 referencia = ref.mediana,
                 direccion = direccion,
                 etiqueta = c.etiqueta,
-                unidad = c.unidad,
+                unidad = c.unidad
             )
         }
         return salida.sortedByDescending { it.first }.map { it.second }

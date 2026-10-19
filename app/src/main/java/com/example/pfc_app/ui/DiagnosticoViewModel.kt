@@ -25,7 +25,7 @@ data class VistaDiagnostico(
     val codigoVehiculo: String,
     val diagnostico: Diagnostico,
     val dictamen: Dictamen,
-    val codigos: List<CodigoDTC>,
+    val codigos: List<CodigoDTC>
 )
 
 data class EstadoPantallaDiagnostico(
@@ -37,7 +37,7 @@ data class EstadoPantallaDiagnostico(
     /** La atención guardada no tiene diagnóstico (CU-06 E1 del paso 4). */
     val sinDiagnostico: Boolean = false,
     val codigoVehiculo: String = "",
-    val error: String? = null,
+    val error: String? = null
 )
 
 sealed interface EventoDiagnostico {
@@ -48,10 +48,7 @@ sealed interface EventoDiagnostico {
  * Pantalla Diagnóstico (CU-07, RNF-02). Con [idAtencion] nulo muestra la atención en curso
  * de la [com.example.pfc_app.SesionAtencion]; con un id, la lee del historial.
  */
-class DiagnosticoViewModel(
-    private val contenedor: AppContenedor,
-    private val idAtencion: Long?,
-) : ViewModel() {
+class DiagnosticoViewModel(private val contenedor: AppContenedor, private val idAtencion: Long?) : ViewModel() {
     private val _estado = MutableStateFlow(EstadoPantallaDiagnostico(enCurso = idAtencion == null))
     val estado: StateFlow<EstadoPantallaDiagnostico> = _estado.asStateFlow()
 
@@ -79,7 +76,7 @@ class DiagnosticoViewModel(
                     codigoVehiculo = actual.vehiculo.codigo,
                     diagnostico = completarConContrato(actual.diagnostico, contrato),
                     dictamen = actual.dictamen,
-                    codigos = actual.diagnostico.codigosLeidos.ifEmpty { actual.atencion.codigos },
+                    codigos = actual.diagnostico.codigosLeidos.ifEmpty { actual.atencion.codigos }
                 )
                 _estado.update { it.copy(cargando = false, vista = vista, codigoVehiculo = vista.codigoVehiculo) }
             } else {
@@ -103,7 +100,7 @@ class DiagnosticoViewModel(
                     codigoVehiculo = codigo,
                     diagnostico = completarConContrato(diag, contrato),
                     dictamen = guardada.dictamen,
-                    codigos = guardada.atencion.codigos,
+                    codigos = guardada.atencion.codigos
                 )
                 _estado.update { it.copy(cargando = false, vista = vista, codigoVehiculo = codigo) }
             }
@@ -111,10 +108,9 @@ class DiagnosticoViewModel(
     }
 
     /** El contrato del modelo, o null si no se pudo cargar (se muestran los códigos tal cual). */
-    private fun contratoOpcional(): ContratoModelo? =
-        runCatching { contenedor.contrato }
-            .onFailure { Registro.w(Registro.UI, "Sin contrato del modelo: se muestran nombres internos", it) }
-            .getOrNull()
+    private fun contratoOpcional(): ContratoModelo? = runCatching { contenedor.contrato }
+        .onFailure { Registro.w(Registro.UI, "Sin contrato del modelo: se muestran nombres internos", it) }
+        .getOrNull()
 
     /** CU-07 paso 5: guarda la atención en una transacción y abre el historial. */
     fun guardar() {
@@ -155,7 +151,7 @@ class DiagnosticoViewModel(
                 val c = contrato.caracteristica(p.parametro) ?: return@map p
                 p.copy(
                     etiqueta = if (p.etiqueta.isBlank() || p.etiqueta == p.parametro) c.etiqueta else p.etiqueta,
-                    unidad = p.unidad.ifBlank { c.unidad },
+                    unidad = p.unidad.ifBlank { c.unidad }
                 )
             }
             val provisional = d.modeloProvisional || (contrato.versionModelo == d.versionModelo && contrato.provisional)

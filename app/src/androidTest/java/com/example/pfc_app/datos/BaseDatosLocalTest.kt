@@ -165,7 +165,11 @@ class BaseDatosLocalTest {
         val v = vehiculos.registrar("Hyundai", "Tucson", 2011, 4)
         val otro = vehiculos.registrar("Kia", "Picanto", 2019, 4)
         val idMedia = atenciones.guardar(atencionDePrueba(v.id, "2026-09-28T10:05:00"), dictamenCompleta(), diagnosticoDePrueba())
-        val idAntigua = atenciones.guardar(atencionDePrueba(v.id, "2026-09-26T16:40:00"), dictamenParcial(), diagnosticoDePrueba().copy(clase = "C0", probabilidad = 0.88))
+        val idAntigua = atenciones.guardar(
+            atencionDePrueba(v.id, "2026-09-26T16:40:00"),
+            dictamenParcial(),
+            diagnosticoDePrueba().copy(clase = "C0", probabilidad = 0.88)
+        )
         val idReciente = atenciones.guardar(atencionDePrueba(v.id, "2026-09-28T11:20:00"), dictamenCompleta(), diagnosticoDePrueba())
         atenciones.guardar(atencionDePrueba(otro.id, "2026-09-29T09:00:00"), dictamenCompleta(), diagnosticoDePrueba())
 
@@ -182,22 +186,30 @@ class BaseDatosLocalTest {
     fun clavesForaneasRechazanFilasHuerfanas() {
         // Lectura de un régimen que no existe.
         assertConstraint {
-            sql.insert("lectura", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
-                put("id_regimen", 999)
-                put("instante", 0.0)
-            })
+            sql.insert(
+                "lectura",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("id_regimen", 999)
+                    put("instante", 0.0)
+                }
+            )
         }
         // Atención de un vehículo que no existe.
         assertConstraint { atenciones.guardar(atencionDePrueba(4242, "2026-09-28T11:20:00"), dictamenCompleta(), null) }
         assertEquals(0, contar("atencion"))
         // Parámetro desviado de un diagnóstico que no existe.
         assertConstraint {
-            sql.insert("parametro_desviado", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
-                put("id_diagnostico", 77)
-                put("parametro", "R2_rpm_desv")
-                put("valor", 1.0)
-                put("direccion", "mayor")
-            })
+            sql.insert(
+                "parametro_desviado",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("id_diagnostico", 77)
+                    put("parametro", "R2_rpm_desv")
+                    put("valor", 1.0)
+                    put("direccion", "mayor")
+                }
+            )
         }
     }
 
@@ -210,37 +222,80 @@ class BaseDatosLocalTest {
         // vehiculo: familia y código fuera de lo permitido.
         assertConstraint { db.execSQL("UPDATE vehiculo SET familia_gestion = 'XYZ' WHERE id_vehiculo = ${v.id}") }
         assertConstraint {
-            db.insert("vehiculo", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
-                put("codigo", "ABC"); put("marca", "X"); put("modelo", "Y"); put("anio", 2010); put("cilindros", 4)
-            })
+            db.insert(
+                "vehiculo",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("codigo", "ABC")
+                    put("marca", "X")
+                    put("modelo", "Y")
+                    put("anio", 2010)
+                    put("cilindros", 4)
+                }
+            )
         }
         // Código repetido.
         assertConstraint {
-            db.insert("vehiculo", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
-                put("codigo", v.codigo); put("marca", "X"); put("modelo", "Y"); put("anio", 2010); put("cilindros", 4)
-            })
+            db.insert(
+                "vehiculo",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("codigo", v.codigo)
+                    put("marca", "X")
+                    put("modelo", "Y")
+                    put("anio", 2010)
+                    put("cilindros", 4)
+                }
+            )
         }
         // regimen.tipo solo R1, R2 o R3.
         assertConstraint {
-            db.insert("regimen", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply { put("id_atencion", idAtencion); put("tipo", "R4") })
+            db.insert(
+                "regimen",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("id_atencion", idAtencion)
+                    put("tipo", "R4")
+                }
+            )
         }
         // codigo_dtc.tipo solo almacenado o pendiente.
         assertConstraint {
-            db.insert("codigo_dtc", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
-                put("id_atencion", idAtencion); put("codigo", "P0300"); put("tipo", "permanente")
-            })
+            db.insert(
+                "codigo_dtc",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("id_atencion", idAtencion)
+                    put("codigo", "P0300")
+                    put("tipo", "permanente")
+                }
+            )
         }
         // dictamen: rechazada no se guarda y hay uno solo por atención.
         assertConstraint { db.execSQL("UPDATE dictamen SET resultado = 'rechazada' WHERE id_atencion = $idAtencion") }
         assertConstraint {
-            db.insert("dictamen", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply { put("id_atencion", idAtencion); put("resultado", "parcial") })
+            db.insert(
+                "dictamen",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("id_atencion", idAtencion)
+                    put("resultado", "parcial")
+                }
+            )
         }
         // diagnostico: probabilidad entre 0 y 1 y uno solo por atención.
         assertConstraint { db.execSQL("UPDATE diagnostico SET probabilidad = -0.1 WHERE id_atencion = $idAtencion") }
         assertConstraint {
-            db.insert("diagnostico", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
-                put("id_atencion", idAtencion); put("clase", "C2"); put("probabilidad", 0.5); put("version_modelo", "x")
-            })
+            db.insert(
+                "diagnostico",
+                SQLiteDatabase.CONFLICT_ABORT,
+                ContentValues().apply {
+                    put("id_atencion", idAtencion)
+                    put("clase", "C2")
+                    put("probabilidad", 0.5)
+                    put("version_modelo", "x")
+                }
+            )
         }
         // parametro_desviado.direccion solo mayor o menor.
         assertConstraint { db.execSQL("UPDATE parametro_desviado SET direccion = 'igual'") }
@@ -250,7 +305,7 @@ class BaseDatosLocalTest {
             atenciones.guardar(
                 atencionDePrueba(v.id, "2026-09-28T12:00:00"),
                 Dictamen(ResultadoDictamen.RECHAZADA, emptyList(), listOf(TipoRegimen.R2), "R2 no reunió las 45 muestras útiles."),
-                null,
+                null
             )
             fail("Debía rechazar el dictamen rechazada")
         } catch (_: IllegalArgumentException) {
@@ -261,7 +316,8 @@ class BaseDatosLocalTest {
     @Test
     fun atencionSinDiagnosticoSeGuardaSinFilaEnDiagnostico() {
         val v = vehiculos.registrar("Chevrolet", "Spark", 2012, 4)
-        val dictamen = Dictamen(ResultadoDictamen.PARCIAL, emptyList(), observacion = "Sin avance de encendido", faltanParametrosModelo = true)
+        val dictamen =
+            Dictamen(ResultadoDictamen.PARCIAL, emptyList(), observacion = "Sin avance de encendido", faltanParametrosModelo = true)
         val id = atenciones.guardar(atencionDePrueba(v.id, "2026-09-28T11:20:00"), dictamen, null)
 
         assertEquals(0, contar("diagnostico"))
@@ -293,7 +349,7 @@ class BaseDatosLocalTest {
             db.execSQL(
                 "CREATE TABLE vehiculo (id_vehiculo INTEGER PRIMARY KEY, codigo TEXT NOT NULL UNIQUE, " +
                     "marca TEXT NOT NULL, modelo TEXT NOT NULL, anio INTEGER NOT NULL, cilindros INTEGER NOT NULL, " +
-                    "familia_gestion TEXT)",
+                    "familia_gestion TEXT)"
             )
             db.execSQL("INSERT INTO vehiculo (codigo, marca, modelo, anio, cilindros) VALUES ('VEH-007', 'Kia', 'Rio', 2015, 4)")
             db.version = 1
@@ -303,7 +359,10 @@ class BaseDatosLocalTest {
         vehiculos = RepositorioVehiculos(base)
         assertTrue("La versión 1 se descarta sin migrar", vehiculos.listar().isEmpty())
         assertEquals("VEH-001", vehiculos.registrar("Hyundai", "Tucson", 2011, 4).codigo)
-        sql.query("PRAGMA user_version").use { c -> c.moveToFirst(); assertEquals(BaseDatosLocal.VERSION, c.getInt(0)) }
+        sql.query("PRAGMA user_version").use { c ->
+            c.moveToFirst()
+            assertEquals(BaseDatosLocal.VERSION, c.getInt(0))
+        }
         sql.query("SELECT COUNT(*) FROM sqlite_master WHERE type = 'trigger'").use { c ->
             c.moveToFirst()
             assertEquals(RestriccionesCheck.NOMBRES_TRIGGERS.size, c.getInt(0))
@@ -312,8 +371,10 @@ class BaseDatosLocalTest {
 
     // ---------- Datos de prueba ----------
 
-    private fun contar(tabla: String): Int =
-        sql.query("SELECT COUNT(*) FROM $tabla").use { c -> c.moveToFirst(); c.getInt(0) }
+    private fun contar(tabla: String): Int = sql.query("SELECT COUNT(*) FROM $tabla").use { c ->
+        c.moveToFirst()
+        c.getInt(0)
+    }
 
     private fun assertConstraint(bloque: () -> Unit) {
         try {
@@ -334,7 +395,7 @@ class BaseDatosLocalTest {
             avanceEncendido = 8.5,
             maf = null,
             map = 35.0,
-            velocidad = 0.0,
+            velocidad = 0.0
         )
     }
 
@@ -345,16 +406,23 @@ class BaseDatosLocalTest {
         protocolo = "ISO 15765-4 (CAN 11/500)",
         codigos = listOf(CodigoDTC("P0303", TipoDTC.ALMACENADO), CodigoDTC("P0171", TipoDTC.PENDIENTE)),
         contadoresModo06 = listOf(
-            ContadorModo06(1, 0, 0), ContadorModo06(2, 0, 0), ContadorModo06(3, 12, 7), ContadorModo06(4, null, null),
+            ContadorModo06(1, 0, 0),
+            ContadorModo06(2, 0, 0),
+            ContadorModo06(3, 12, 7),
+            ContadorModo06(4, null, null)
         ),
         regimenes = mapOf(
             TipoRegimen.R1 to Regimen(tipo = TipoRegimen.R1, lecturas = lecturas(950.0), muestrasUtiles = 54, frecuenciaHz = 2.4),
             TipoRegimen.R2 to Regimen(
-                tipo = TipoRegimen.R2, lecturas = lecturas(812.25), muestrasUtiles = 46,
-                descartadasTransitorio = 2, descartadasTecho = 1, frecuenciaHz = 2.5,
+                tipo = TipoRegimen.R2,
+                lecturas = lecturas(812.25),
+                muestrasUtiles = 46,
+                descartadasTransitorio = 2,
+                descartadasTecho = 1,
+                frecuenciaHz = 2.5
             ),
-            TipoRegimen.R3 to Regimen(tipo = TipoRegimen.R3, lecturas = lecturas(2500.0), muestrasUtiles = 78, frecuenciaHz = 2.6),
-        ),
+            TipoRegimen.R3 to Regimen(tipo = TipoRegimen.R3, lecturas = lecturas(2500.0), muestrasUtiles = 78, frecuenciaHz = 2.6)
+        )
     )
 
     private fun dictamenCompleta() = Dictamen(ResultadoDictamen.COMPLETA, emptyList())
@@ -368,8 +436,8 @@ class BaseDatosLocalTest {
         versionModelo = "0.1.0-provisional",
         parametrosDesviados = listOf(
             ParametroDesviado("R2_rpm_desv", 14.9, 3.5, Direccion.MAYOR),
-            ParametroDesviado("R2_avance_media", 2.1, 8.0, Direccion.MENOR),
-        ),
+            ParametroDesviado("R2_avance_media", 2.1, 8.0, Direccion.MENOR)
+        )
     )
 
     private companion object {

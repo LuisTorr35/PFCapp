@@ -61,6 +61,7 @@ object EtiquetasPrueba {
     const val TARJETA_VEHICULO = "tarjeta_vehiculo"
     const val AVISO_HISTORIAL = "aviso_historial"
     const val LISTA_ATENCIONES = "lista_atenciones"
+
     /** Todas las filas llevan la misma etiqueta; la primera es la más reciente. */
     const val FILA_ATENCION = "fila_atencion"
     const val HISTORIAL_VACIO = "historial_vacio"

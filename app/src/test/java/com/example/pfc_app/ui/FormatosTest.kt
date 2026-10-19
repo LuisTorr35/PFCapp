@@ -49,7 +49,7 @@ class FormatosTest {
         assertEquals("ninguno", Formatos.codigos(emptyList()))
         assertEquals(
             "P0303 almacenado. Se muestra como contexto, no como fundamento de la clasificación.",
-            Formatos.codigosDiagnostico(codigos),
+            Formatos.codigosDiagnostico(codigos)
         )
         assertEquals("Ninguno", Formatos.codigosDiagnostico(emptyList()))
 
@@ -58,7 +58,7 @@ class FormatosTest {
         assertEquals("sin fallos", Formatos.fallosModo06(listOf(ContadorModo06(1, 0, 0), ContadorModo06(2, 0, 3))))
         assertEquals(
             "cilindro 1, 2; cilindro 3, 12",
-            Formatos.fallosModo06(listOf(ContadorModo06(3, 12, 0), ContadorModo06(2, 0, 0), ContadorModo06(1, 2, 1))),
+            Formatos.fallosModo06(listOf(ContadorModo06(3, 12, 0), ContadorModo06(2, 0, 0), ContadorModo06(1, 2, 1)))
         )
     }
 
@@ -78,17 +78,25 @@ class FormatosTest {
         assertEquals("Repita solo R2; R1 y R3 se conservan.", Formatos.indicacionRepeticion(listOf(TipoRegimen.R2), todos))
         assertEquals(
             "Repita solo R2; R3 se conserva.",
-            Formatos.indicacionRepeticion(listOf(TipoRegimen.R2), listOf(TipoRegimen.R2, TipoRegimen.R3)),
+            Formatos.indicacionRepeticion(listOf(TipoRegimen.R2), listOf(TipoRegimen.R2, TipoRegimen.R3))
         )
         assertEquals(
             "Repita solo R2 y R3.",
-            Formatos.indicacionRepeticion(listOf(TipoRegimen.R3, TipoRegimen.R2), listOf(TipoRegimen.R2, TipoRegimen.R3)),
+            Formatos.indicacionRepeticion(listOf(TipoRegimen.R3, TipoRegimen.R2), listOf(TipoRegimen.R2, TipoRegimen.R3))
         )
     }
 
     @Test
     fun motivoDelDictamen() {
-        val regla = ResultadoRegla(2, NivelRegla.OBLIGATORIA, "45 muestras útiles", EfectoRegla.RECHAZA, TipoRegimen.R2, "R2 no reunió las 45 muestras útiles.")
+        val regla =
+            ResultadoRegla(
+                2,
+                NivelRegla.OBLIGATORIA,
+                "45 muestras útiles",
+                EfectoRegla.RECHAZA,
+                TipoRegimen.R2,
+                "R2 no reunió las 45 muestras útiles."
+            )
         val d = Dictamen(ResultadoDictamen.RECHAZADA, listOf(regla), listOf(TipoRegimen.R2))
         assertEquals("R2 no reunió las 45 muestras útiles.", Formatos.motivoDictamen(d, EfectoRegla.RECHAZA))
         assertEquals("Observación", Formatos.motivoDictamen(d.copy(observacion = "Observación")))

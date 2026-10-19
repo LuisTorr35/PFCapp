@@ -50,7 +50,7 @@ fun BarraSuperior(titulo: String, alVolver: (() -> Unit)? = null) {
     Column(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             if (alVolver != null) {
                 TextButton(onClick = alVolver, modifier = Modifier.testTag(EtiquetasPrueba.BOTON_VOLVER)) {
@@ -78,7 +78,7 @@ fun Tarjeta(
     grosorBorde: Int = 1,
     /** false en tarjetas con campos de texto, que deben conservar su propio nodo. */
     fusionar: Boolean = true,
-    contenido: @Composable ColumnScope.() -> Unit,
+    contenido: @Composable ColumnScope.() -> Unit
 ) {
     val base = modifier
         .fillMaxWidth()
@@ -93,7 +93,7 @@ fun Tarjeta(
     Column(
         modifier = conAccion.padding(horizontal = 18.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
-        content = contenido,
+        content = contenido
     )
 }
 
@@ -119,12 +119,7 @@ fun TextoSecundario(texto: String, modifier: Modifier = Modifier) {
 
 /** Botón principal negro de ancho completo; deshabilitado se ve con borde gris, como en la maqueta. */
 @Composable
-fun BotonPrincipal(
-    texto: String,
-    alPulsar: () -> Unit,
-    modifier: Modifier = Modifier,
-    habilitado: Boolean = true,
-) {
+fun BotonPrincipal(texto: String, alPulsar: () -> Unit, modifier: Modifier = Modifier, habilitado: Boolean = true) {
     Button(
         onClick = alPulsar,
         enabled = habilitado,
@@ -134,9 +129,9 @@ fun BotonPrincipal(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             disabledContainerColor = Color.Transparent,
-            disabledContentColor = GrisBorde,
+            disabledContentColor = GrisBorde
         ),
-        border = if (habilitado) null else BorderStroke(1.dp, GrisBorde),
+        border = if (habilitado) null else BorderStroke(1.dp, GrisBorde)
     ) {
         Text(texto, fontSize = 17.sp, fontWeight = FontWeight.Bold)
     }
@@ -144,12 +139,7 @@ fun BotonPrincipal(
 
 /** Botón con borde negro, como "Atender", "Historial" o "Repetir R2". */
 @Composable
-fun BotonSecundario(
-    texto: String,
-    alPulsar: () -> Unit,
-    modifier: Modifier = Modifier,
-    habilitado: Boolean = true,
-) {
+fun BotonSecundario(texto: String, alPulsar: () -> Unit, modifier: Modifier = Modifier, habilitado: Boolean = true) {
     OutlinedButton(
         onClick = alPulsar,
         enabled = habilitado,
@@ -158,9 +148,9 @@ fun BotonSecundario(
         border = BorderStroke(1.dp, if (habilitado) MaterialTheme.colorScheme.outline else GrisBorde),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = GrisBorde,
+            disabledContentColor = GrisBorde
         ),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(texto, fontSize = 15.sp, fontWeight = FontWeight.Bold)
     }
@@ -177,14 +167,14 @@ fun AvisoDemostracion(idGrabacion: String?, detalle: String?, modifier: Modifier
         shape = FormaTarjeta,
         color = AmarilloAviso,
         contentColor = Negro,
-        border = BorderStroke(2.dp, Negro),
+        border = BorderStroke(2.dp, Negro)
     ) {
         Column(Modifier.padding(horizontal = 18.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Modo demostración", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
             Text(
                 if (idGrabacion != null) "Se reproduce la atención grabada $idGrabacion" else "Se reproduce una atención grabada",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             )
             if (!detalle.isNullOrBlank()) Text(detalle, fontSize = 14.sp)
             Text("No se está leyendo un vehículo conectado.", fontSize = 14.sp)
@@ -199,7 +189,7 @@ fun TarjetaError(titulo: String, motivo: String, alVolver: (() -> Unit)? = null,
         modifier = modifier.testTag(EtiquetasPrueba.TARJETA_ERROR),
         borde = MaterialTheme.colorScheme.error,
         fondo = MaterialTheme.colorScheme.errorContainer,
-        grosorBorde = 2,
+        grosorBorde = 2
     ) {
         Text(titulo, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
         Text(motivo, fontSize = 15.sp, color = MaterialTheme.colorScheme.onErrorContainer)
@@ -220,14 +210,14 @@ fun BarraProbabilidad(probabilidad: Double, modifier: Modifier = Modifier) {
             .height(28.dp)
             .clip(RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
-            .testTag(EtiquetasPrueba.BARRA_PROBABILIDAD),
+            .testTag(EtiquetasPrueba.BARRA_PROBABILIDAD)
     ) {
         if (fraccion > 0f) {
             Box(
                 Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(fraccion)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp)),
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
             )
         }
     }
@@ -241,7 +231,7 @@ fun BarraAvance(fraccion: Float, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .height(10.dp)
             .clip(RoundedCornerShape(5.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(5.dp)),
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(5.dp))
     ) {
         val f = fraccion.coerceIn(0f, 1f)
         if (f > 0f) {

@@ -23,17 +23,13 @@ data class ResumenAtencion(
     val observacion: String,
     val clase: String?,
     val probabilidad: Double?,
-    val versionModelo: String?,
+    val versionModelo: String?
 ) {
     val tieneDiagnostico: Boolean get() = clase != null
 }
 
 /** Una atención leída de la base con su dictamen y su diagnóstico (null si quedó sin él). */
-data class AtencionGuardada(
-    val atencion: Atencion,
-    val dictamen: Dictamen,
-    val diagnostico: Diagnostico?,
-)
+data class AtencionGuardada(val atencion: Atencion, val dictamen: Dictamen, val diagnostico: Diagnostico?)
 
 /** Atenciones guardadas en el historial del vehículo (RF-06). */
 class RepositorioAtenciones(private val base: BaseDatosLocal) {
@@ -53,36 +49,40 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                     EntidadAtencion(
                         idVehiculo = atencion.idVehiculo,
                         fecha = FechasIso.normalizar(atencion.fecha),
-                        baroKpa = atencion.barometricaSesion,
-                    ),
+                        baroKpa = atencion.barometricaSesion
+                    )
                 )
                 for (tipo in TipoRegimen.entries) {
                     val regimen = atencion.regimenes[tipo] ?: continue
                     insertarRegimen(idAtencion, regimen)
                 }
-                dao.insertarCodigos(atencion.codigos.map { EntidadCodigoDtc(idAtencion = idAtencion, codigo = it.codigo, tipo = it.tipo.texto) })
+                dao.insertarCodigos(
+                    atencion.codigos.map {
+                        EntidadCodigoDtc(idAtencion = idAtencion, codigo = it.codigo, tipo = it.tipo.texto)
+                    }
+                )
                 dao.insertarContadores(
                     atencion.contadoresModo06.map {
                         EntidadContadorModo06(
                             idAtencion = idAtencion,
                             cilindro = it.cilindro,
                             conteoFallo = it.conteoActual,
-                            conteoPromedio = it.conteoPromedio,
+                            conteoPromedio = it.conteoPromedio
                         )
-                    },
+                    }
                 )
                 dao.insertarDictamen(
                     EntidadDictamen(
                         idAtencion = idAtencion,
                         resultado = dictamen.resultado.texto,
-                        observacion = dictamen.observacion.takeUnless { it.isBlank() },
-                    ),
+                        observacion = dictamen.observacion.takeUnless { it.isBlank() }
+                    )
                 )
                 if (diagnostico != null) insertarDiagnostico(idAtencion, diagnostico)
                 Registro.i(
                     Registro.DATOS,
                     "Atención $idAtencion guardada: ${atencion.regimenes.size} regímenes, " +
-                        "dictamen ${dictamen.resultado.texto}, diagnóstico ${diagnostico?.clase ?: "ninguno"}",
+                        "dictamen ${dictamen.resultado.texto}, diagnóstico ${diagnostico?.clase ?: "ninguno"}"
                 )
                 idAtencion
             }
@@ -93,18 +93,17 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
     }
 
     /** Atenciones del vehículo, de la más reciente a la más antigua. */
-    fun listarPorVehiculo(idVehiculo: Long): List<ResumenAtencion> =
-        dao.listarResumenes(idVehiculo).map { f ->
-            ResumenAtencion(
-                idAtencion = f.idAtencion,
-                fecha = f.fecha,
-                resultado = ResultadoDictamen.desdeTexto(f.resultado) ?: ResultadoDictamen.PARCIAL,
-                observacion = f.observacion.orEmpty(),
-                clase = f.clase,
-                probabilidad = f.probabilidad,
-                versionModelo = f.versionModelo,
-            )
-        }
+    fun listarPorVehiculo(idVehiculo: Long): List<ResumenAtencion> = dao.listarResumenes(idVehiculo).map { f ->
+        ResumenAtencion(
+            idAtencion = f.idAtencion,
+            fecha = f.fecha,
+            resultado = ResultadoDictamen.desdeTexto(f.resultado) ?: ResultadoDictamen.PARCIAL,
+            observacion = f.observacion.orEmpty(),
+            clase = f.clase,
+            probabilidad = f.probabilidad,
+            versionModelo = f.versionModelo
+        )
+    }
 
     /** La atención con sus regímenes, lecturas, códigos, contadores, dictamen y diagnóstico. */
     fun obtener(idAtencion: Long): AtencionGuardada? {
@@ -118,7 +117,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                 muestrasUtiles = r.muestrasUtiles,
                 descartadasTransitorio = r.descartadasTransitorio,
                 descartadasTecho = r.descartadasTecho,
-                frecuenciaHz = r.frecuenciaHz ?: 0.0,
+                frecuenciaHz = r.frecuenciaHz ?: 0.0
             )
         }
         val codigos = dao.codigos(idAtencion).map { CodigoDTC(it.codigo, TipoDTC.desdeTexto(it.tipo)) }
@@ -131,7 +130,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
             baroKpa = cabecera.baroKpa,
             codigos = codigos,
             contadoresModo06 = contadores,
-            regimenes = regimenes.associateBy { it.tipo },
+            regimenes = regimenes.associateBy { it.tipo }
         )
 
         val diagnostico = leerDiagnostico(idAtencion, codigos)
@@ -142,7 +141,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                 reglas = emptyList(),
                 observacion = d.observacion.orEmpty(),
                 // Una atención guardada sin diagnóstico es la de la regla 8 (CU-05 E1).
-                faltanParametrosModelo = diagnostico == null,
+                faltanParametrosModelo = diagnostico == null
             )
         } ?: return null
 
@@ -157,8 +156,8 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                 muestrasUtiles = r.muestrasUtiles,
                 descartadasTransitorio = r.descartadasTransitorio,
                 descartadasTecho = r.descartadasTecho,
-                frecuenciaHz = r.frecuenciaHz,
-            ),
+                frecuenciaHz = r.frecuenciaHz
+            )
         )
         if (r.lecturas.isEmpty()) Registro.w(Registro.DATOS, "El régimen ${r.tipo} no tiene lecturas")
         dao.insertarLecturas(
@@ -176,9 +175,9 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                     maf = l.maf,
                     map = l.map,
                     // La velocidad del PID 0x0D es un entero en km/h.
-                    velocidad = l.velocidad?.roundToLong(),
+                    velocidad = l.velocidad?.roundToLong()
                 )
-            },
+            }
         )
     }
 
@@ -188,8 +187,8 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                 idAtencion = idAtencion,
                 clase = d.clase,
                 probabilidad = ajustarProbabilidad(d.probabilidad),
-                versionModelo = d.versionModelo,
-            ),
+                versionModelo = d.versionModelo
+            )
         )
         dao.insertarParametros(
             d.parametrosDesviados.map { p ->
@@ -198,9 +197,9 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                     parametro = p.parametro,
                     valor = p.valor,
                     referencia = p.referencia.takeUnless { it.isNaN() },
-                    direccion = p.direccion.texto,
+                    direccion = p.direccion.texto
                 )
-            },
+            }
         )
     }
 
@@ -215,7 +214,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                 parametro = p.parametro,
                 valor = p.valor,
                 referencia = p.referencia ?: Double.NaN,
-                direccion = Direccion.desdeTexto(p.direccion) ?: Direccion.MAYOR,
+                direccion = Direccion.desdeTexto(p.direccion) ?: Direccion.MAYOR
             )
         }
         return Diagnostico(
@@ -226,7 +225,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
             versionModelo = fila.versionModelo,
             parametrosDesviados = parametros,
             codigosLeidos = codigos,
-            modeloProvisional = fila.versionModelo.contains("provisional", ignoreCase = true),
+            modeloProvisional = fila.versionModelo.contains("provisional", ignoreCase = true)
         )
     }
 
@@ -248,7 +247,7 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
             avanceEncendido = avanceEncendido,
             maf = maf,
             map = map,
-            velocidad = velocidad?.toDouble(),
+            velocidad = velocidad?.toDouble()
         )
     }
 }

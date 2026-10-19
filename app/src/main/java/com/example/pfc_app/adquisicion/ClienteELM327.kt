@@ -16,7 +16,7 @@ data class TiemposELM327(
     val consulta: Long = 5_000,
     /** Pausa entre intentos de 0100 en línea K, como rescatar_linea_k(). */
     val pausaLineaK: Long = 2_000,
-    val pausaCan: Long = 500,
+    val pausaCan: Long = 500
 )
 
 /** Resultado del inicio del adaptador y de la detección del protocolo. */
@@ -28,7 +28,7 @@ data class InicioELM327(
     val nombreProtocolo: String,
     val formato: FormatoTrama,
     /** Emisor del motor aprendido de la primera respuesta válida a 0100. */
-    val direccionMotor: Int,
+    val direccionMotor: Int
 )
 
 /**
@@ -42,10 +42,7 @@ data class InicioELM327(
  * ATSP del protocolo memorizado o ATSP0 (automático) y 0100 con reintentos. Si no
  * engancha, prueba la línea K como diagnostico_vehiculo.py: ATSP3, ATSP4 y ATSP5.
  */
-class ClienteELM327(
-    private val transporte: TransporteSerie,
-    private val tiempos: TiemposELM327 = TiemposELM327(),
-) {
+class ClienteELM327(private val transporte: TransporteSerie, private val tiempos: TiemposELM327 = TiemposELM327()) {
     var formato: FormatoTrama = FormatoTrama.CAN_11
         private set
 
@@ -118,7 +115,7 @@ class ClienteELM327(
                 enviar("ATZ", tiempos.reinicio)
             } catch (e: TiempoAgotadoException) {
                 throw AdaptadorNoEncontradoException(
-                    "El adaptador ELM327 no responde. Revise que esté enchufado al conector OBD-II y vinculado con el teléfono.",
+                    "El adaptador ELM327 no responde. Revise que esté enchufado al conector OBD-II y vinculado con el teléfono."
                 )
             }
         }
@@ -135,7 +132,7 @@ class ClienteELM327(
             if (inicio != null) return inicio.copy(versionElm = version)
         }
         throw VehiculoNoRespondeException(
-            "El vehículo no responde. Revise que el contacto esté encendido y que el adaptador esté bien enchufado.",
+            "El vehículo no responde. Revise que el contacto esté encendido y que el adaptador esté bien enchufado."
         )
     }
 
@@ -172,7 +169,7 @@ class ClienteELM327(
                         Registro.BT,
                         "Enganchado: protocolo $numero ($nombre), motor en la dirección ${"%02X".format(motor.origen)}" +
                             (if (validos.size > 1) ", contestan ${validos.joinToString { "%02X".format(it.origen) }}" else "") +
-                            (if (motor.origen != motorHabitual(formato)) " (no es la habitual)" else ""),
+                            (if (motor.origen != motorHabitual(formato)) " (no es la habitual)" else "")
                     )
                     return InicioELM327(null, numero, nombre, formato, motor.origen)
                 }
@@ -212,7 +209,7 @@ class ClienteELM327(
         Registro.w(
             Registro.BT,
             "Respuesta de la dirección ${"%02X".format(otro.origen)} en vez de la del motor " +
-                (direccionMotor?.let { "%02X".format(it) } ?: "(sin aprender)") + ": se acepta",
+                (direccionMotor?.let { "%02X".format(it) } ?: "(sin aprender)") + ": se acepta"
         )
         return otro
     }

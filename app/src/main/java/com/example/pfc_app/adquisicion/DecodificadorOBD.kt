@@ -20,7 +20,7 @@ enum class PidOBD(
     val canonico: String,
     val bytes: Int,
     val campo: CampoLectura? = null,
-    private val formula: (IntArray) -> Double?,
+    private val formula: (IntArray) -> Double?
 ) {
     // anillo rápido, en el orden de PARAMETROS de registrar_obd.py
     RPM(0x0C, "RPM", "rpm", 2, CampoLectura.RPM, { d -> ((d[0] shl 8) or d[1]) * 0.25 }),
@@ -39,6 +39,7 @@ enum class PidOBD(
     O2_B1S1(0x14, "O2_B1S1", "o2_arriba_v", 2, null, { d -> d[0] / 200.0 }),
     O2_S2_WR_VOLTAGE(0x25, "O2_S2_WR_VOLTAGE", "o2_abajo_v", 4, null, { d -> ((d[2] shl 8) or d[3]) * 8.0 / 65535 }),
     O2_B1S2(0x15, "O2_B1S2", "o2_abajo_v", 2, null, { d -> d[0] / 200.0 }),
+
     // estado del sistema de combustible: categórico, se consulta pero no se guarda en Lectura
     FUEL_STATUS(0x03, "FUEL_STATUS", "estado_comb", 2, null, { _ -> null }),
     TIMING_ADVANCE(0x0E, "TIMING_ADVANCE", "avance_grados", 1, CampoLectura.AVANCE, { d -> (d[0] - 128) / 2.0 }),
@@ -86,7 +87,7 @@ enum class PidOBD(
             listOf(INTAKE_TEMP), listOf(COOLANT_TEMP), listOf(SHORT_FUEL_TRIM_1), listOf(LONG_FUEL_TRIM_1),
             listOf(COMMANDED_EQUIV_RATIO), listOf(SHORT_FUEL_TRIM_2), listOf(LONG_FUEL_TRIM_2),
             listOf(O2_S1_WR_VOLTAGE, O2_B1S1), listOf(O2_S2_WR_VOLTAGE, O2_B1S2), listOf(FUEL_STATUS),
-            listOf(TIMING_ADVANCE), listOf(THROTTLE_POS), listOf(CONTROL_MODULE_VOLTAGE),
+            listOf(TIMING_ADVANCE), listOf(THROTTLE_POS), listOf(CONTROL_MODULE_VOLTAGE)
         )
 
         /** Constantes de sesión: se leen una sola vez (CONSTANTES_SESION). */
@@ -96,7 +97,7 @@ enum class PidOBD(
         val ANILLO_LENTO: List<PidOBD> = listOf(
             FUEL_PRESSURE, FUEL_RAIL_PRESSURE_ABS, FUEL_RAIL_PRESSURE_DIRECT, FUEL_INJECT_TIMING, FUEL_RATE,
             COMMANDED_EGR, EGR_ERROR, EVAPORATIVE_PURGE, CATALYST_TEMP_B1S1, CATALYST_TEMP_B1S2,
-            AMBIANT_AIR_TEMP, OIL_TEMP, RUN_TIME, FUEL_TYPE, FUEL_RAIL_PRESSURE_VAC,
+            AMBIANT_AIR_TEMP, OIL_TEMP, RUN_TIME, FUEL_TYPE, FUEL_RAIL_PRESSURE_VAC
         )
 
         /** Lentos que se consultan cada tantas muestras (CADA_LENTOS). */

@@ -21,13 +21,16 @@ class ReglaR1EnFrio(private val umbral: Double = UMBRAL_C) : ReglaBase() {
         val inicial = r1.lecturas.firstNotNullOfOrNull { it.tempRefrigerante }
             ?: return degrada(
                 "R1 sin lectura de refrigerante: no se puede verificar que fuera en frío",
-                TipoRegimen.R1,
+                TipoRegimen.R1
             )
-        return if (inicial < umbral) cumple(regimen = TipoRegimen.R1)
-        else degrada(
-            "R1 no fue en frío: el refrigerante inicial era ${texto(inicial)} °C (debe ser menor a ${texto(umbral)} °C)",
-            TipoRegimen.R1,
-        )
+        return if (inicial < umbral) {
+            cumple(regimen = TipoRegimen.R1)
+        } else {
+            degrada(
+                "R1 no fue en frío: el refrigerante inicial era ${texto(inicial)} °C (debe ser menor a ${texto(umbral)} °C)",
+                TipoRegimen.R1
+            )
+        }
     }
 
     companion object {

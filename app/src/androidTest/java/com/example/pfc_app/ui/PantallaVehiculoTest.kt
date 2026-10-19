@@ -124,4 +124,3 @@ class PantallaVehiculoTest {
         compose.onNodeWithTag(E.BOTON_REGISTRAR).performScrollTo().performClick()
     }
 }
-

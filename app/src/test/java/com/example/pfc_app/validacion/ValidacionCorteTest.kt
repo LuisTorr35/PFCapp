@@ -3,11 +3,11 @@ package com.example.pfc_app.validacion
 import com.example.pfc_app.Recursos
 import com.example.pfc_app.inferencia.LectorContrato
 import com.example.pfc_app.modelos.ResultadoDictamen
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 /**
  * Valida desde los CSV reales las 25 atenciones del corte e informa el dictamen de

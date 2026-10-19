@@ -4,7 +4,7 @@ package com.example.pfc_app.modelos
 enum class TipoRegimen(val nombre: String) {
     R1("Ralentí en frío"),
     R2("Ralentí caliente"),
-    R3("Aceleraciones en neutro"),
+    R3("Aceleraciones en neutro")
 }
 
 /**
@@ -24,7 +24,7 @@ data class Lectura(
     val avanceEncendido: Double? = null,
     val maf: Double? = null,
     val map: Double? = null,
-    val velocidad: Double? = null,
+    val velocidad: Double? = null
 )
 
 /** Un régimen capturado con sus lecturas y sus conteos de muestras. */
@@ -35,7 +35,7 @@ data class Regimen(
     val muestrasUtiles: Int = 0,
     val descartadasTransitorio: Int = 0,
     val descartadasTecho: Int = 0,
-    val frecuenciaHz: Double = 0.0,
+    val frecuenciaHz: Double = 0.0
 )
 
 enum class TipoDTC(val texto: String) {
@@ -43,28 +43,19 @@ enum class TipoDTC(val texto: String) {
     PENDIENTE("pendiente");
 
     companion object {
-        fun desdeTexto(texto: String?): TipoDTC =
-            entries.firstOrNull { it.texto.equals(texto, ignoreCase = true) } ?: ALMACENADO
+        fun desdeTexto(texto: String?): TipoDTC = entries.firstOrNull { it.texto.equals(texto, ignoreCase = true) } ?: ALMACENADO
     }
 }
 
 /** Código de diagnóstico leído en la lectura inicial (modos 03 y 07). */
-data class CodigoDTC(
-    val codigo: String,
-    val tipo: TipoDTC,
-    val descripcion: String = "",
-)
+data class CodigoDTC(val codigo: String, val tipo: TipoDTC, val descripcion: String = "")
 
 /**
  * Contadores de fallo de encendido de un cilindro (modo 06, MID A2 a A9).
  * [conteoActual] es la prueba MISFIRE_COUNT (TID 0C, ciclo actual) y
  * [conteoPromedio] la prueba MISFIRE_AVERAGE (TID 0B, promedio de diez ciclos).
  */
-data class ContadorModo06(
-    val cilindro: Int,
-    val conteoActual: Int? = null,
-    val conteoPromedio: Int? = null,
-)
+data class ContadorModo06(val cilindro: Int, val conteoActual: Int? = null, val conteoPromedio: Int? = null)
 
 /**
  * La atención: registro completo de una sesión de medición sobre un vehículo.
@@ -82,7 +73,7 @@ data class Atencion(
     val protocolo: String? = null,
     val codigos: List<CodigoDTC> = emptyList(),
     val contadoresModo06: List<ContadorModo06> = emptyList(),
-    val regimenes: Map<TipoRegimen, Regimen> = emptyMap(),
+    val regimenes: Map<TipoRegimen, Regimen> = emptyMap()
 ) {
     fun regimen(tipo: TipoRegimen): Regimen? = regimenes[tipo]
 

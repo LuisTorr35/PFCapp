@@ -17,19 +17,25 @@ object MapaColumnas {
         "carga_calc_pct" to listOf("calculated engine load", "carga calculada", "engine load"),
         "carga_abs_pct" to listOf("absolute load value", "carga absoluta", "absolute load"),
         "map_kpa" to listOf(
-            "intake manifold absolute pressure", "presion absoluta del multiple",
-            "intake manifold pressure", "map",
+            "intake manifold absolute pressure",
+            "presion absoluta del multiple",
+            "intake manifold pressure",
+            "map"
         ),
         "maf_gps" to listOf("mass air flow", "flujo de masa de aire", "maf"),
         "iat_c" to listOf("intake air temperature", "temperatura del aire de admision", "iat"),
         "ect_c" to listOf("engine coolant temperature", "temperatura del refrigerante", "coolant"),
         "stft_b1_pct" to listOf(
-            "short term fuel trim bank 1", "ajuste de combustible a corto plazo",
-            "short term fuel", "stft",
+            "short term fuel trim bank 1",
+            "ajuste de combustible a corto plazo",
+            "short term fuel",
+            "stft"
         ),
         "ltft_b1_pct" to listOf(
-            "long term fuel trim bank 1", "ajuste de combustible a largo plazo",
-            "long term fuel", "ltft",
+            "long term fuel trim bank 1",
+            "ajuste de combustible a largo plazo",
+            "long term fuel",
+            "ltft"
         ),
         "lambda_eq" to listOf("commanded equivalence ratio", "relacion de equivalencia", "lambda"),
         "o2_arriba_v" to listOf("o2 arriba", "o2 s1 wr voltage", "o2 b1s1", "oxygen sensor 1", "sensor de oxigeno 1"),
@@ -58,7 +64,7 @@ object MapaColumnas {
         "tiempo_marcha_s" to listOf("tiempo marcha", "run time"),
         "tipo_comb" to listOf("tipo comb", "fuel type"),
         "version_protocolo" to listOf("version protocolo"),
-        "presion_riel_vac_kpa" to listOf("presion riel vac"),
+        "presion_riel_vac_kpa" to listOf("presion riel vac")
     )
 
     private val PARENTESIS = Regex("\\([^)]*\\)")
@@ -109,7 +115,7 @@ object MapaColumnas {
     /** Valores que pd.read_csv toma como vacíos. */
     private val VACIOS_PANDAS = setOf(
         "", "#N/A", "#N/A N/A", "#NA", "-1.#IND", "-1.#QNAN", "-NaN", "-nan", "1.#IND", "1.#QNAN",
-        "<NA>", "N/A", "NA", "NULL", "NaN", "None", "n/a", "nan", "null",
+        "<NA>", "N/A", "NA", "NULL", "NaN", "None", "n/a", "nan", "null"
     )
 
     /** a_numerico(): número tolerando coma decimal y texto residual; null si no es número. */

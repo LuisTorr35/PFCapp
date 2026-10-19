@@ -32,7 +32,7 @@ class ProcesadorCaracteristicas {
         Registro.i(
             Registro.PROCESAMIENTO,
             "Fila de la atención ${atencion.id}: ${valores.entries.joinToString { "${it.key}=${it.value}" }}" +
-                if (faltan.isEmpty()) "" else ". Sin calcular: ${faltan.joinToString()}",
+                if (faltan.isEmpty()) "" else ". Sin calcular: ${faltan.joinToString()}"
         )
         return FilaCaracteristicas(valores)
     }
@@ -58,13 +58,13 @@ class ProcesadorCaracteristicas {
             Registro.PROCESAMIENTO,
             "${regimen.tipo}: ${m.filasBrutas} filas, ${m.utiles.size} útiles, " +
                 "${m.descartadasTransitorio} por transitorio, ${m.descartadasTecho} por techo, " +
-                "${"%.2f".format(m.frecuenciaHz)} Hz",
+                "${"%.2f".format(m.frecuenciaHz)} Hz"
         )
         return regimen.copy(
             muestrasUtiles = m.utiles.size,
             descartadasTransitorio = m.descartadasTransitorio,
             descartadasTecho = m.descartadasTecho,
-            frecuenciaHz = m.frecuenciaHz,
+            frecuenciaHz = m.frecuenciaHz
         )
     }
 
@@ -104,7 +104,7 @@ class ProcesadorCaracteristicas {
             "R2_stft_b1_pct_media", "R2_stft_b1_pct_desv", "R2_ltft_b1_pct_media",
             "R2_avance_grados_media", "R2_avance_grados_desv", "R2_trim_total",
             "R3_rpm_pendiente", "R3_carga_calc_pct_max",
-            "R3_stft_b1_pct_media", "R3_ltft_b1_pct_media", "R3_avance_grados_media",
+            "R3_stft_b1_pct_media", "R3_ltft_b1_pct_media", "R3_avance_grados_media"
         )
     }
 }

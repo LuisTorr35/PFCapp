@@ -36,11 +36,7 @@ import com.example.pfc_app.ui.theme.Negro
  * probabilidad, parámetros desviados frente a la referencia sin falla y códigos como contexto.
  */
 @Composable
-fun PantallaDiagnostico(
-    vm: DiagnosticoViewModel,
-    alVolver: () -> Unit,
-    alAbrirHistorial: (idVehiculo: Long) -> Unit,
-) {
+fun PantallaDiagnostico(vm: DiagnosticoViewModel, alVolver: () -> Unit, alAbrirHistorial: (idVehiculo: Long) -> Unit) {
     val estado by vm.estado.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {
@@ -58,15 +54,18 @@ fun PantallaDiagnostico(
             estado.cargando -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
             }
+
             estado.sinDiagnostico -> Column(Modifier.weight(1f).padding(16.dp)) {
                 Tarjeta {
                     TituloTarjeta("Atención sin diagnóstico")
                     TextoTarjeta("Esta atención no tiene diagnóstico porque el vehículo no expone los parámetros que requiere el modelo.")
                 }
             }
+
             vista == null -> Column(Modifier.weight(1f).padding(16.dp)) {
                 TarjetaError("No se puede mostrar el diagnóstico", estado.error ?: "Sin datos.", alVolver = alVolver)
             }
+
             else -> ContenidoDiagnostico(vista, Modifier.weight(1f))
         }
         if (estado.enCurso && vista != null) {
@@ -75,7 +74,7 @@ fun PantallaDiagnostico(
                     if (estado.guardando) "Guardando…" else "Guardar atención",
                     vm::guardar,
                     Modifier.testTag(EtiquetasPrueba.BOTON_GUARDAR_ATENCION),
-                    habilitado = !estado.guardando,
+                    habilitado = !estado.guardando
                 )
             }
         }
@@ -87,7 +86,7 @@ fun PantallaDiagnostico(
             onDismissRequest = vm::cerrarError,
             title = { Text("Aviso") },
             text = { Text(estado.error.orEmpty()) },
-            confirmButton = { TextButton(onClick = vm::cerrarError) { Text("Aceptar") } },
+            confirmButton = { TextButton(onClick = vm::cerrarError) { Text("Aceptar") } }
         )
     }
 }
@@ -100,7 +99,7 @@ private fun ContenidoDiagnostico(vista: VistaDiagnostico, modifier: Modifier = M
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Sin fusionar: el nombre de la clase y la probabilidad conservan sus etiquetas de prueba.
         Tarjeta(fusionar = false) {
@@ -110,12 +109,12 @@ private fun ContenidoDiagnostico(vista: VistaDiagnostico, modifier: Modifier = M
                 modifier = Modifier.testTag(EtiquetasPrueba.NOMBRE_CLASE),
                 fontSize = 26.sp,
                 lineHeight = 32.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
             Text(
                 "Clase ${d.clase} · probabilidad ${Formatos.porcentaje(d.probabilidad)}",
                 modifier = Modifier.testTag(EtiquetasPrueba.TEXTO_PROBABILIDAD),
-                fontSize = 17.sp,
+                fontSize = 17.sp
             )
             Spacer(Modifier.height(4.dp))
             BarraProbabilidad(d.probabilidad)
@@ -138,7 +137,7 @@ private fun ContenidoDiagnostico(vista: VistaDiagnostico, modifier: Modifier = M
 
         Column(
             Modifier.padding(top = 6.dp).testTag(EtiquetasPrueba.PIE_DIAGNOSTICO),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             TextoSecundario("Atención ${vista.dictamen.resultado.texto} · modelo ${d.versionModelo}")
             if (vista.dictamen.resultado == ResultadoDictamen.PARCIAL && vista.dictamen.observacion.isNotBlank()) {
@@ -149,13 +148,13 @@ private fun ContenidoDiagnostico(vista: VistaDiagnostico, modifier: Modifier = M
                     shape = FormaBoton,
                     color = AmarilloAviso,
                     contentColor = Negro,
-                    border = BorderStroke(1.dp, Negro),
+                    border = BorderStroke(1.dp, Negro)
                 ) {
                     Text(
                         "Modelo provisional",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
+                        fontSize = 14.sp
                     )
                 }
             }

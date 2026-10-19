@@ -15,7 +15,7 @@ import com.example.pfc_app.modelos.TipoRegimen
 class ReglaRampasR3(
     private val minimoRampas: Int = MINIMO_RAMPAS,
     private val umbralSubida: Double = SUBIDA_RPM,
-    private val umbralRetorno: Double = RETORNO_RPM,
+    private val umbralRetorno: Double = RETORNO_RPM
 ) : ReglaBase() {
     override val numero = 6
     override val nivel = NivelRegla.GRADUADA
@@ -25,12 +25,15 @@ class ReglaRampasR3(
     override fun evaluar(atencion: Atencion): ResultadoRegla {
         val r3 = atencion.regimen(TipoRegimen.R3) ?: return cumple("No aplica: falta R3 (ver regla 2)")
         val (rampas, maximo) = contarRampas(r3.lecturas)
-        return if (rampas >= minimoRampas) cumple(regimen = TipoRegimen.R3)
-        else degrada(
-            "R3 con $rampas de $minimoRampas rampas sobre ${texto(umbralSubida)} rpm con retorno bajo " +
-                "${texto(umbralRetorno)} (máximo alcanzado ${maximo?.let { texto(it) } ?: "sin rpm"} rpm)",
-            TipoRegimen.R3,
-        )
+        return if (rampas >= minimoRampas) {
+            cumple(regimen = TipoRegimen.R3)
+        } else {
+            degrada(
+                "R3 con $rampas de $minimoRampas rampas sobre ${texto(umbralSubida)} rpm con retorno bajo " +
+                    "${texto(umbralRetorno)} (máximo alcanzado ${maximo?.let { texto(it) } ?: "sin rpm"} rpm)",
+                TipoRegimen.R3
+            )
+        }
     }
 
     /** Número de rampas completas y máximo de rpm del régimen. */

@@ -43,8 +43,8 @@ object LectorContrato {
                     q3 = ref.getDouble("q3"),
                     desv = ref.optDouble("desv", 0.0),
                     limiteInferior = ref.getDouble("limite_inferior"),
-                    limiteSuperior = ref.getDouble("limite_superior"),
-                ),
+                    limiteSuperior = ref.getDouble("limite_superior")
+                )
             )
         }.sortedBy { it.indice }
 
@@ -64,7 +64,7 @@ object LectorContrato {
             clases = clases,
             caracteristicas = caracteristicas,
             regimenesRequeridos = regimenes,
-            columnasLecturaRequeridas = columnas,
+            columnasLecturaRequeridas = columnas
         )
     }
 

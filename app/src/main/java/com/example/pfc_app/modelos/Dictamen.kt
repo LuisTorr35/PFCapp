@@ -7,8 +7,7 @@ enum class ResultadoDictamen(val texto: String) {
     RECHAZADA("rechazada");
 
     companion object {
-        fun desdeTexto(texto: String?): ResultadoDictamen? =
-            entries.firstOrNull { it.texto.equals(texto, ignoreCase = true) }
+        fun desdeTexto(texto: String?): ResultadoDictamen? = entries.firstOrNull { it.texto.equals(texto, ignoreCase = true) }
     }
 }
 
@@ -16,19 +15,22 @@ enum class ResultadoDictamen(val texto: String) {
 enum class NivelRegla(val texto: String) {
     OBLIGATORIA("obligatoria"),
     GRADUADA("graduada"),
-    CONDICIONAL("condicional"),
+    CONDICIONAL("condicional")
 }
 
 /** Qué produce una regla al evaluarse sobre una atención. */
 enum class EfectoRegla {
     /** Se cumple, o no aplica. */
     CUMPLE,
+
     /** Degrada la atención a parcial. */
     DEGRADA,
+
     /** Rechaza la atención. */
     RECHAZA,
+
     /** No rechaza ni degrada, pero la atención se guarda sin diagnóstico (regla 8). */
-    SIN_DIAGNOSTICO,
+    SIN_DIAGNOSTICO
 }
 
 data class ResultadoRegla(
@@ -39,7 +41,7 @@ data class ResultadoRegla(
     /** Régimen al que se refiere el incumplimiento, si corresponde a uno. */
     val regimen: TipoRegimen? = null,
     /** Motivo legible para el mecánico, vacío si se cumple. */
-    val motivo: String = "",
+    val motivo: String = ""
 )
 
 data class Dictamen(
@@ -49,7 +51,7 @@ data class Dictamen(
     /** Comentario del dictamen: reglas graduadas incumplidas o motivo del rechazo. */
     val observacion: String = "",
     /** true si el vehículo no expone los parámetros que pide el modelo (regla 8, CU-05 E1). */
-    val faltanParametrosModelo: Boolean = false,
+    val faltanParametrosModelo: Boolean = false
 ) {
     val reglasIncumplidas: List<ResultadoRegla> get() = reglas.filter { it.efecto != EfectoRegla.CUMPLE }
 

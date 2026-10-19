@@ -27,12 +27,7 @@ import com.example.pfc_app.ui.theme.AmarilloAviso
  * desde Diagnóstico ("guardada") o desde Captura sin diagnóstico ("sin_diagnostico").
  */
 @Composable
-fun PantallaHistorial(
-    vm: HistorialViewModel,
-    aviso: String?,
-    alVolver: () -> Unit,
-    alAbrirAtencion: (idAtencion: Long) -> Unit,
-) {
+fun PantallaHistorial(vm: HistorialViewModel, aviso: String?, alVolver: () -> Unit, alAbrirAtencion: (idAtencion: Long) -> Unit) {
     val estado by vm.estado.collectAsStateWithLifecycle()
 
     // Se relee cada vez que la pantalla aparece.
@@ -43,12 +38,14 @@ fun PantallaHistorial(
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag(EtiquetasPrueba.LISTA_ATENCIONES),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val textoAviso = when (aviso) {
                 CapturaViewModel.AVISO_GUARDADA -> "Atención guardada en el historial."
+
                 CapturaViewModel.AVISO_SIN_DIAGNOSTICO ->
                     "La atención quedó en el historial sin diagnóstico: el vehículo no expone los parámetros que requiere el modelo."
+
                 else -> null
             }
             if (textoAviso != null) {
@@ -74,7 +71,7 @@ fun PantallaHistorial(
                 item(key = "vacio") {
                     TextoSecundario(
                         "Este vehículo todavía no tiene atenciones guardadas.",
-                        Modifier.testTag(EtiquetasPrueba.HISTORIAL_VACIO),
+                        Modifier.testTag(EtiquetasPrueba.HISTORIAL_VACIO)
                     )
                 }
             }
@@ -83,7 +80,7 @@ fun PantallaHistorial(
                     modifier = Modifier.testTag(EtiquetasPrueba.FILA_ATENCION),
                     alPulsar = {
                         if (f.tieneDiagnostico) alAbrirAtencion(f.idAtencion) else vm.avisarSinDiagnostico(true)
-                    },
+                    }
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -103,7 +100,7 @@ fun PantallaHistorial(
             onDismissRequest = { vm.avisarSinDiagnostico(false) },
             title = { Text("Atención sin diagnóstico") },
             text = { Text("Esta atención no tiene diagnóstico porque el vehículo no expone los parámetros que requiere el modelo.") },
-            confirmButton = { TextButton(onClick = { vm.avisarSinDiagnostico(false) }) { Text("Aceptar") } },
+            confirmButton = { TextButton(onClick = { vm.avisarSinDiagnostico(false) }) { Text("Aceptar") } }
         )
     }
 }

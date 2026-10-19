@@ -23,7 +23,7 @@ class ReglaVelocidadCero : ReglaBase() {
         val detalle = conMovimiento.entries.joinToString { (tipo, v) -> "$tipo hasta ${texto(v)} km/h" }
         return rechaza(
             "El vehículo se movió durante la captura ($detalle): el protocolo es con el vehículo detenido y en neutro",
-            conMovimiento.keys.first(),
+            conMovimiento.keys.first()
         )
     }
 

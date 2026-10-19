@@ -12,10 +12,7 @@ import com.example.pfc_app.modelos.ContratoModelo
  * entrada y la salida se buscan por los nombres que declara el contrato: entrada
  * float32 [1, n] y salida "probabilities" float32 [1, clases].
  */
-class ModeloClasificacionOnnx(
-    private val bytesModelo: ByteArray,
-    override val contrato: ContratoModelo,
-) : ModeloClasificacion {
+class ModeloClasificacionOnnx(private val bytesModelo: ByteArray, override val contrato: ContratoModelo) : ModeloClasificacion {
 
     private val entorno: OrtEnvironment = OrtEnvironment.getEnvironment()
     private val opciones = OrtSession.SessionOptions().apply {
@@ -28,7 +25,7 @@ class ModeloClasificacionOnnx(
         Registro.i(
             Registro.INFERENCIA,
             "Modelo ${contrato.versionModelo} cargado (${bytesModelo.size} bytes): entradas ${sesion.inputNames}, " +
-                "salidas ${sesion.outputNames}",
+                "salidas ${sesion.outputNames}"
         )
         require(contrato.nombreEntrada in sesion.inputNames) {
             "El modelo no tiene la entrada '${contrato.nombreEntrada}' que declara el contrato (tiene ${sesion.inputNames})"
@@ -60,7 +57,9 @@ class ModeloClasificacionOnnx(
                 val primera = valor.firstOrNull()
                 if (primera is FloatArray) return primera.copyOf()
             }
+
             is FloatArray -> return valor.copyOf()
+
             is List<*> -> {
                 val mapa = valor.firstOrNull() as? Map<*, *>
                 if (mapa != null) {

@@ -64,7 +64,7 @@ interface DaoAtenciones {
         LEFT JOIN diagnostico g ON g.id_atencion = a.id_atencion
         WHERE a.id_vehiculo = :idVehiculo
         ORDER BY a.fecha DESC, a.id_atencion DESC
-        """,
+        """
     )
     fun listarResumenes(idVehiculo: Long): List<FilaResumenAtencion>
 

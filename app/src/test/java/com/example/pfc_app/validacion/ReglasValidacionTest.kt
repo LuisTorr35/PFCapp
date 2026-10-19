@@ -9,11 +9,11 @@ import com.example.pfc_app.modelos.TipoRegimen
 import com.example.pfc_app.validacion.AtencionesSinteticas.aceleraciones
 import com.example.pfc_app.validacion.AtencionesSinteticas.buena
 import com.example.pfc_app.validacion.AtencionesSinteticas.ralenti
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 /**
  * RF-04: cada regla tiene pruebas para los resultados que su nivel admite.

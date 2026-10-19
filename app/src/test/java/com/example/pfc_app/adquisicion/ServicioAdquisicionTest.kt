@@ -12,6 +12,7 @@ import com.example.pfc_app.modelos.Vehiculo
 import com.example.pfc_app.procesamiento.FuenteArchivosCarpeta
 import com.example.pfc_app.procesamiento.ProcesadorCaracteristicas
 import com.example.pfc_app.validacion.ValidadorAtencion
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -27,7 +28,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 /** CU-03, CU-08 y RNF-01 con tiempo virtual: la demostración desde las grabaciones y el modo real con un adaptador falso. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -85,7 +85,7 @@ class ServicioAdquisicionTest {
         // y la fila es exactamente la de la grabación
         assertEquals(
             Recursos.tablaConsolidador().getValue("ATN-037"),
-            procesador.prepararFila(repetida).valores.toMap(),
+            procesador.prepararFila(repetida).valores.toMap()
         )
         s.finalizar()
         assertEquals(EstadoEnlace.DESCONECTADO, s.estado.value.enlace)
@@ -116,7 +116,9 @@ class ServicioAdquisicionTest {
             assertEquals(g.id, tabla.getValue(g.id), procesador.prepararFila(atencion).valores.toMap())
             val d = validador.validar(atencion)
             assertEquals(g.id, g.id == "ATN-036", d.faltanParametrosModelo)
-            println("${g.descripcion} (${g.claseConfirmada}): ${d.resultado.texto}" + if (d.faltanParametrosModelo) ", sin diagnóstico" else "")
+            println(
+                "${g.descripcion} (${g.claseConfirmada}): ${d.resultado.texto}" + if (d.faltanParametrosModelo) ", sin diagnóstico" else ""
+            )
         }
     }
 
@@ -208,11 +210,11 @@ private class AdaptadorFalso(
     private val conecta: Boolean = true,
     private val ectInicial: Double = 62.0,
     private val ectCalentamiento: List<Double> = listOf(90.0),
-    private val caerEnR2TrasFilas: Int? = null,
+    private val caerEnR2TrasFilas: Int? = null
 ) : AdaptadorELM327 {
     override val esDemostracion = false
-    private val _estado = MutableStateFlow(EstadoEnlace.DESCONECTADO)
-    override val estadoEnlace: StateFlow<EstadoEnlace> = _estado
+    private val _estadoEnlace = MutableStateFlow(EstadoEnlace.DESCONECTADO)
+    override val estadoEnlace: StateFlow<EstadoEnlace> = _estadoEnlace
     val pedidos = ArrayList<TipoRegimen>()
     var consultasRefrigerante = 0
     var reconexiones = 0
@@ -220,7 +222,7 @@ private class AdaptadorFalso(
 
     override suspend fun conectar(): ResultadoConexion {
         if (!conecta) return ResultadoConexion(false, mensajeError = "El vehículo no responde. Revise que el contacto esté encendido.")
-        _estado.value = EstadoEnlace.CONECTADO
+        _estadoEnlace.value = EstadoEnlace.CONECTADO
         return ResultadoConexion(true, "ISO 15765-4 (CAN 11/500)", com.example.pfc_app.modelos.FamiliaGestion.MAP)
     }
 
@@ -231,8 +233,11 @@ private class AdaptadorFalso(
     override suspend fun leerTemperaturaRefrigerante(): Double? {
         consultasRefrigerante++
         // las dos primeras consultas son la lectura inicial y la del arranque
-        return if (consultasRefrigerante <= 2) ectInicial
-        else ectCalentamiento.getOrElse(consultasRefrigerante - 3) { ectCalentamiento.last() }
+        return if (consultasRefrigerante <= 2) {
+            ectInicial
+        } else {
+            ectCalentamiento.getOrElse(consultasRefrigerante - 3) { ectCalentamiento.last() }
+        }
     }
 
     override fun leerParametros(regimen: TipoRegimen): Flow<Lectura> = flow {
@@ -242,7 +247,7 @@ private class AdaptadorFalso(
             if (k > 0) delay(1000)
             if (regimen == TipoRegimen.R2 && caerEnR2TrasFilas != null && !cayo && k == caerEnR2TrasFilas) {
                 cayo = true
-                _estado.value = EstadoEnlace.RECONECTANDO
+                _estadoEnlace.value = EstadoEnlace.RECONECTANDO
                 throw EnlaceCaidoException("read() devolvió -1")
             }
             val rpm = when (regimen) {
@@ -250,6 +255,7 @@ private class AdaptadorFalso(
                     val fase = k % 20
                     if (fase < 10) 800.0 + 2200.0 * fase / 9 else 3000.0 - 2200.0 * (fase - 10) / 9
                 }
+
                 else -> 760.0 + k % 3
             }
             val ect = when (regimen) {
@@ -259,8 +265,8 @@ private class AdaptadorFalso(
             emit(
                 Lectura(
                     instante = k.toDouble(), rpm = rpm, tempRefrigerante = ect, stft = 1.563, ltft = -2.344,
-                    cargaCalculada = 25.0, avanceEncendido = 10.0, map = 30.0, velocidad = 0.0,
-                ),
+                    cargaCalculada = 25.0, avanceEncendido = 10.0, map = 30.0, velocidad = 0.0
+                )
             )
             k++
         }
@@ -268,11 +274,11 @@ private class AdaptadorFalso(
 
     override suspend fun reconectar(): Boolean {
         reconexiones++
-        _estado.value = EstadoEnlace.CONECTADO
+        _estadoEnlace.value = EstadoEnlace.CONECTADO
         return true
     }
 
     override suspend fun cerrar() {
-        _estado.value = EstadoEnlace.DESCONECTADO
+        _estadoEnlace.value = EstadoEnlace.DESCONECTADO
     }
 }

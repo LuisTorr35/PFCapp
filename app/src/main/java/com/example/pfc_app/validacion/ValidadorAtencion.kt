@@ -25,7 +25,7 @@ class ValidadorAtencion(private val contrato: ContratoModelo) {
         ReglaRampasR3(),
         ReglaVelocidadCero(),
         ReglaParametrosModelo(contrato),
-        ReglaBarometrica(),
+        ReglaBarometrica()
     )
 
     fun validar(atencion: Atencion): Dictamen {
@@ -33,7 +33,7 @@ class ValidadorAtencion(private val contrato: ContratoModelo) {
             regla.evaluar(atencion).also { r ->
                 Registro.d(
                     Registro.VALIDACION,
-                    "Regla ${r.numero} (${r.nivel.texto}): ${r.efecto}" + if (r.motivo.isEmpty()) "" else ". ${r.motivo}",
+                    "Regla ${r.numero} (${r.nivel.texto}): ${r.efecto}" + if (r.motivo.isEmpty()) "" else ". ${r.motivo}"
                 )
             }
         }
@@ -52,14 +52,14 @@ class ValidadorAtencion(private val contrato: ContratoModelo) {
             reglas = resultados,
             regimenesARepetir = aRepetir,
             observacion = observacion(resultado, resultados.filter { it.efecto != EfectoRegla.CUMPLE }, aRepetir),
-            faltanParametrosModelo = sinDiagnostico,
+            faltanParametrosModelo = sinDiagnostico
         )
         Registro.i(
             Registro.VALIDACION,
             "Dictamen de la atención ${atencion.id}: ${resultado.texto}" +
                 (if (aRepetir.isEmpty()) "" else ", repetir ${aRepetir.joinToString()}") +
                 (if (sinDiagnostico) ", sin diagnóstico (regla 8)" else "") +
-                (if (dictamen.observacion.isEmpty()) "" else ". ${dictamen.observacion}"),
+                (if (dictamen.observacion.isEmpty()) "" else ". ${dictamen.observacion}")
         )
         return dictamen
     }
@@ -68,7 +68,7 @@ class ValidadorAtencion(private val contrato: ContratoModelo) {
     private fun observacion(
         resultado: ResultadoDictamen,
         incumplidas: List<com.example.pfc_app.modelos.ResultadoRegla>,
-        aRepetir: List<TipoRegimen>,
+        aRepetir: List<TipoRegimen>
     ): String {
         val orden = listOf(EfectoRegla.RECHAZA, EfectoRegla.DEGRADA, EfectoRegla.SIN_DIAGNOSTICO)
         val motivos = orden.flatMap { e -> incumplidas.filter { it.efecto == e }.map { it.motivo } }

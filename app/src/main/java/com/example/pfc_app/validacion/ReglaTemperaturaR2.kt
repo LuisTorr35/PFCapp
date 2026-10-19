@@ -24,16 +24,19 @@ class ReglaTemperaturaR2(private val umbral: Double = UMBRAL_C) : ReglaBase() {
         if (ect.isEmpty()) {
             return degrada(
                 "R2 sin lectura de refrigerante: no se puede verificar la temperatura de trabajo",
-                TipoRegimen.R2,
+                TipoRegimen.R2
             )
         }
         val minimo = ect.min()
-        return if (minimo >= umbral) cumple(regimen = TipoRegimen.R2)
-        else rechaza(
-            "El refrigerante en R2 bajó a ${texto(minimo)} °C: el ralentí caliente exige " +
-                "${texto(umbral)} °C o más en todo el tramo (motor sin calentar)",
-            TipoRegimen.R2,
-        )
+        return if (minimo >= umbral) {
+            cumple(regimen = TipoRegimen.R2)
+        } else {
+            rechaza(
+                "El refrigerante en R2 bajó a ${texto(minimo)} °C: el ralentí caliente exige " +
+                    "${texto(umbral)} °C o más en todo el tramo (motor sin calentar)",
+                TipoRegimen.R2
+            )
+        }
     }
 
     companion object {

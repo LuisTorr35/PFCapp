@@ -53,10 +53,9 @@ class AppContenedor(contexto: Context) {
 
     @Volatile private var datosAbiertos: Datos? = null
 
-    private fun datos(): Datos =
-        datosAbiertos ?: synchronized(candadoDatos) {
-            datosAbiertos ?: Datos(BaseDatosLocal.crear(this.contexto)).also { datosAbiertos = it }
-        }
+    private fun datos(): Datos = datosAbiertos ?: synchronized(candadoDatos) {
+        datosAbiertos ?: Datos(BaseDatosLocal.crear(this.contexto)).also { datosAbiertos = it }
+    }
 
     val baseDatos: BaseDatosLocal get() = datos().base
     val repositorioVehiculos: RepositorioVehiculos get() = datos().vehiculos
@@ -68,6 +67,7 @@ class AppContenedor(contexto: Context) {
         Registro.i(Registro.INFERENCIA, "Cargando el modelo desde assets")
         CargadorModelo.desdeAssets(this.contexto)
     }
+
     /** Contrato del modelo (clases, características y referencias sin falla). */
     val contrato: ContratoModelo get() = proveedorContrato()
 
@@ -86,8 +86,10 @@ class AppContenedor(contexto: Context) {
     /** Un servicio nuevo por atención. */
     var fabricaServicio: () -> ServicioAdquisicion = ::servicioReal
     var fabricaAdaptador: (ConfiguracionAdaptador) -> AdaptadorELM327 = ::adaptadorReal
+
     /** CU-04: ValidadorAtencion(contrato).validar(atencion). */
     var validarAtencion: (Atencion) -> Dictamen = ::validarReal
+
     /** CU-05 y CU-07: fila de características y modelo; null si a la fila le falta algo. */
     var diagnosticarAtencion: (Atencion) -> Diagnostico? = ::diagnosticarReal
     var proveedorContrato: () -> ContratoModelo = { modelo.contrato }
@@ -107,6 +109,7 @@ class AppContenedor(contexto: Context) {
     private fun adaptadorReal(config: ConfiguracionAdaptador): AdaptadorELM327 = when (config) {
         is ConfiguracionAdaptador.Demostracion ->
             AdaptadorELM327Demo(contexto, config.grabacion, config.simularRechazo)
+
         is ConfiguracionAdaptador.Bluetooth ->
             AdaptadorELM327Bluetooth(contexto, config.direccionMac)
     }

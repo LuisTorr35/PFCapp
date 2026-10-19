@@ -27,7 +27,7 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = GrisBorde,
     error = RojoError,
     errorContainer = RojoErrorClaro,
-    onErrorContainer = Negro,
+    onErrorContainer = Negro
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -43,7 +43,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = GrisOscuro,
     onSurfaceVariant = GrisBorde,
     outline = Blanco,
-    outlineVariant = GrisTexto,
+    outlineVariant = GrisTexto
 )
 
 @Composable
@@ -60,6 +60,7 @@ fun PFCappTheme(
         }
 
         darkTheme -> DarkColorScheme
+
         else -> LightColorScheme
     }
 

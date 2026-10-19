@@ -25,7 +25,7 @@ class RepositorioVehiculos(private val base: BaseDatosLocal) {
                 modelo = modelo.trim(),
                 anio = anio,
                 cilindros = cilindros,
-                familiaGestion = null,
+                familiaGestion = null
             )
             val id = dao.insertar(fila)
             Registro.i(Registro.DATOS, "Vehículo registrado $codigo (id $id)")
@@ -68,7 +68,7 @@ class RepositorioVehiculos(private val base: BaseDatosLocal) {
             modelo = modelo,
             anio = anio,
             cilindros = cilindros,
-            familiaGestion = familiaGestion?.let(FamiliaGestion::desdeTexto),
+            familiaGestion = familiaGestion?.let(FamiliaGestion::desdeTexto)
         )
     }
 }

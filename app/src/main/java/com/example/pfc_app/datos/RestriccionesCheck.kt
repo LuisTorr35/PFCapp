@@ -40,14 +40,14 @@ object RestriccionesCheck {
         Check("contador_modo06", "conteo_promedio", "NEW.conteo_promedio >= 0"),
         Check("dictamen", "resultado", "NEW.resultado IN ('completa', 'parcial')"),
         Check("diagnostico", "probabilidad", "NEW.probabilidad BETWEEN 0 AND 1"),
-        Check("parametro_desviado", "direccion", "NEW.direccion IN ('mayor', 'menor')"),
+        Check("parametro_desviado", "direccion", "NEW.direccion IN ('mayor', 'menor')")
     )
 
     /** Los dos CREATE TRIGGER de cada CHECK, en el orden de [CHECKS]. */
     val SENTENCIAS: List<String> = CHECKS.flatMap { c ->
         listOf(
             sentencia(c.triggerInsercion, "INSERT", c),
-            sentencia(c.triggerActualizacion, "UPDATE OF ${c.columna}", c),
+            sentencia(c.triggerActualizacion, "UPDATE OF ${c.columna}", c)
         )
     }
 
