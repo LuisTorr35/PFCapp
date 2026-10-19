@@ -1,0 +1,48 @@
+# Compilación y archivos locales del entorno
+build/
+.gradle/
+.idea/
+.cxx/
+.externalNativeBuild/
+.kotlin/
+captures/
+local.properties
+*.iml
+.DS_Store
+*.log
+hs_err_pid*
+
+# Paquetes y firmas
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Python
+.venv/
+__pycache__/
+
+# Material, documentos y evidencia: se quedan en el disco, fuera del repositorio
+documentacion_app/
+evidencia_practica/
+capturas_emulador/
+TECNOLOGIAS.md
+
+# Modelo y datos. Se suben los scripts de entrenamiento, no sus entradas ni sus salidas
+modelo_provisional/
+modelo/datos/
+modelo/procesado/
+modelo/salida/
+modelo/referencia/
+modelo/*.md
+*.onnx
+*.pkl
+
+# Atenciones grabadas y salidas del modelo dentro de la app (se regeneran con
+# herramientas/preparar_recursos.py, ver README)
+*.csv
+app/src/main/assets/modelo/
+app/src/main/assets/demo/ATN-*/
+app/src/test/resources/crudo/
+app/src/test/resources/consolidador/
+app/src/test/resources/modelo/
