@@ -131,7 +131,7 @@ fun PantallaVehiculo(
             Registro.w(Registro.BT, "El mecánico rechazó el permiso BLUETOOTH_CONNECT")
             vm.mostrarError(
                 "Sin el permiso de dispositivos cercanos no se puede usar el adaptador Bluetooth. " +
-                    "Puede concederlo en Ajustes › Aplicaciones › PFCapp › Permisos.",
+                    "Puede concederlo en Ajustes › Aplicaciones › PFC-app › Permisos.",
             )
         } else if (pidiendoParaSelector) {
             conBluetoothEncendido { vm.abrirSelectorAdaptador() }
@@ -283,7 +283,14 @@ private fun TarjetaModo(
     alElegirAdaptador: () -> Unit,
 ) {
     Tarjeta(fusionar = false) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // Toda la fila cambia el modo, no solo el interruptor (en el teléfono se tocaba el texto).
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(value = modoDemostracion, onValueChange = alCambiarModo, role = Role.Switch)
+                .testTag(EtiquetasPrueba.INTERRUPTOR_DEMO),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Column(Modifier.weight(1f)) {
                 TituloTarjeta("Modo demostración")
                 TextoSecundario(
@@ -292,15 +299,16 @@ private fun TarjetaModo(
                 )
             }
             Spacer(Modifier.width(12.dp))
+            // Colores del tema: con colores fijos, en modo oscuro la pista negra no se veía
+            // sobre el fondo negro y no se distinguía si el modo estaba activado.
             Switch(
                 checked = modoDemostracion,
-                onCheckedChange = alCambiarModo,
-                modifier = Modifier.testTag(EtiquetasPrueba.INTERRUPTOR_DEMO),
+                onCheckedChange = null,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Blanco,
-                    checkedTrackColor = Negro,
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
                     uncheckedThumbColor = GrisBorde,
-                    uncheckedTrackColor = Blanco,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surface,
                     uncheckedBorderColor = GrisBorde,
                 ),
             )
