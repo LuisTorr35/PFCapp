@@ -136,12 +136,19 @@ class ReglasValidacionTest {
     }
 
     @Test
+    fun regla4Acepta84GradosExactos() {
+        // límite inclusivo: el caso de ATN-015, con muestras útiles en 84,0 °C
+        val at = buena(r2 = ralenti(TipoRegimen.R2, ect = { if (it in 25..26) 84.0 else 88.0 }))
+        assertEquals(EfectoRegla.CUMPLE, regla(4).evaluar(at).efecto)
+    }
+
+    @Test
     fun regla4RechazaR2SinCalentar() {
-        val at = buena(r2 = ralenti(TipoRegimen.R2, ect = { if (it == 40) 84.0 else 88.0 }))
+        val at = buena(r2 = ralenti(TipoRegimen.R2, ect = { if (it == 40) 83.9 else 88.0 }))
         val r = regla(4).evaluar(at)
         assertEquals(EfectoRegla.RECHAZA, r.efecto)
         assertEquals(TipoRegimen.R2, r.regimen)
-        assertTrue(r.motivo, r.motivo.contains("84 °C"))
+        assertTrue(r.motivo, r.motivo.contains("83.9 °C") || r.motivo.contains("83,9 °C"))
         assertEquals(listOf(TipoRegimen.R2), validador.validar(at).regimenesARepetir)
     }
 
