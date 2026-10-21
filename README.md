@@ -8,7 +8,7 @@ La aplicación se conecta por Bluetooth clásico (perfil de puerto serie) a un a
 
 | Ruta | Contenido |
 |---|---|
-| `app/src/main/java/com/example/pfc_app/` | Código de la app, organizado según el Capítulo 5 del documento: `ui`, `adquisicion`, `validacion`, `procesamiento`, `inferencia`, `datos` y `modelos` |
+| `app/src/main/java/com/example/pfc_app/` | Código de la app, organizado según el Capítulo 5 del documento: `ui`, `adquisicion`, `validacion`, `procesamiento`, `inferencia`, `datos` y `modelos`, más `cuenta` (inicio de sesión con Google) |
 | `app/src/test/` | Pruebas unitarias en JVM: equivalencia con el consolidador, reglas de validación, inferencia, protocolo ELM327 y servicio de captura |
 | `app/src/androidTest/` | Pruebas instrumentadas: base de datos, pantallas, flujo de demostración e inferencia con ONNX Runtime para Android |
 | `modelo/scripts/` | Corte de datos, comparación de Random Forest, k-NN y SVM, exportación a ONNX y verificación |
@@ -59,6 +59,17 @@ El script copia:
 
 Solo lee del repositorio de la tesis.
 
+### 3. Configuración de Firebase (`google-services.json`)
+
+La app inicia sesión con Google mediante Firebase Authentication y Credential Manager. El archivo `app/google-services.json` tiene la configuración del proyecto de Firebase y no se versiona (`.gitignore`). Sin él, la compilación falla en la tarea `processDebugGoogleServices`. Para obtenerlo:
+
+1. En la [consola de Firebase](https://console.firebase.google.com), abrir el proyecto y entrar a *Configuración del proyecto › General › Tus apps*. Elegir la app Android `com.example.pfc_app` o registrarla con ese nombre de paquete.
+2. Agregar en esa app la huella SHA-1 del certificado que firma el APK. Para la variante debug se obtiene con `./gradlew signingReport`. Sin la huella, Google rechaza el inicio de sesión.
+3. Descargar `google-services.json` y copiarlo en `app/`, junto a `app/build.gradle.kts`.
+4. En *Authentication › Método de acceso*, activar el proveedor Google.
+
+El plugin `com.google.gms.google-services` lee el archivo y genera `default_web_client_id`, el id de cliente web que usa la opción "Continuar con Google". Solo el primer inicio de sesión necesita internet. Firebase guarda la sesión en el teléfono, y después la app abre directo en Vehículos, también sin conexión.
+
 ## Compilar, probar e instalar
 
 ```
@@ -70,6 +81,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 - **SDK:** minSdk 29 (Android 10), targetSdk 37.
 - **Room y KSP:** Room 2.8.5 con KSP 2.2.10-2.0.2. Esa versión de KSP agrega las fuentes generadas con `kotlin.sourceSets`, que el Kotlin integrado de AGP 9 rechaza por defecto; por eso `gradle.properties` lleva `android.disallowKotlinSourceSets=false`.
 - **ONNX Runtime en las pruebas unitarias:** usan la versión de escritorio 1.17.3. La JBR de Android Studio trae un `msvcp140.dll` antiguo, incompatible con versiones más nuevas.
+- **Firebase y googleid:** BoM de Firebase 34.19.0 y googleid 1.1.1. La BoM 35 (firebase-auth 25) y googleid 1.2 están compiladas con Kotlin 2.4, y el Kotlin 2.2 integrado en AGP 9.4 no lee esos metadatos.
 
 ## Esquema de la base de datos
 
@@ -88,7 +100,7 @@ python herramientas/esquema_desde_room.py --comparar esquema_dispositivo.sql
 Cada módulo escribe en Logcat con su propia etiqueta:
 
 ```
-adb logcat -s PFC.BT PFC.Captura PFC.Validacion PFC.Procesamiento PFC.Inferencia PFC.Datos PFC.UI
+adb logcat -s PFC.BT PFC.Captura PFC.Validacion PFC.Procesamiento PFC.Inferencia PFC.Datos PFC.UI PFC.Nube
 ```
 
 ## Ramas
