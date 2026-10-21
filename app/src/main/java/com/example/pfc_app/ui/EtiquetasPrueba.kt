@@ -72,6 +72,7 @@ object EtiquetasPrueba {
 
     /** Todas las filas llevan la misma etiqueta; la primera es la más reciente. */
     const val FILA_ATENCION = "fila_atencion"
+    const val MARCA_RESPALDO = "marca_respaldo"
     const val HISTORIAL_VACIO = "historial_vacio"
     const val DIALOGO_SIN_DIAGNOSTICO = "dialogo_sin_diagnostico"
 }
