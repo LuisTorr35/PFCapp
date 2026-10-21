@@ -11,6 +11,14 @@ object EtiquetasPrueba {
     // Comunes
     const val BOTON_VOLVER = "boton_volver"
 
+    // Inicio de sesión y menú de la cuenta
+    const val BOTON_CONTINUAR_GOOGLE = "boton_continuar_google"
+    const val AVISO_SIN_CONEXION = "aviso_sin_conexion"
+    const val BOTON_MENU_CUENTA = "boton_menu_cuenta"
+    const val MENU_CERRAR_SESION = "menu_cerrar_sesion"
+    const val DIALOGO_CERRAR_SESION = "dialogo_cerrar_sesion"
+    const val BOTON_CONFIRMAR_CERRAR_SESION = "boton_confirmar_cerrar_sesion"
+
     // Vehículos (CU-01)
     const val INTERRUPTOR_DEMO = "interruptor_demo"
     const val BOTON_ELEGIR_ADAPTADOR = "boton_elegir_adaptador"
