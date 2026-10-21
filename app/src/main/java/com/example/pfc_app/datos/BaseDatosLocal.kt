@@ -17,6 +17,8 @@ import androidx.room.RoomDatabase
  *   conteo del ciclo actual (MISFIRE_COUNT).
  * - parametro_desviado guarda además referencia, el valor sin falla que ve el mecánico.
  * - vehiculo.familia_gestion admite también 'ambos' (el vehículo expone MAF y MAP).
+ * - atencion guarda además respaldada, respaldada_en y uid_respaldo (versión 3, respaldo en
+ *   la nube); la migración desde la versión 2 conserva los datos (Migraciones).
  */
 @Database(
     entities = [
@@ -35,8 +37,11 @@ abstract class BaseDatosLocal : RoomDatabase() {
     companion object {
         const val NOMBRE = "pfc_app.db"
 
-        /** La versión 1 fue la base con SQLiteOpenHelper; la 2 es la primera con Room. */
-        const val VERSION = 2
+        /**
+         * La versión 1 fue la base con SQLiteOpenHelper; la 2, la primera con Room; la 3 agrega
+         * el estado de respaldo de cada atención.
+         */
+        const val VERSION = 3
 
         /** Tablas en orden de dependencia (las hijas después de sus padres). */
         val TABLAS = listOf(
@@ -55,6 +60,7 @@ abstract class BaseDatosLocal : RoomDatabase() {
             return constructor
                 // La versión 1 no llegó a usuarios: se descarta sin migrar. Las siguientes deben migrar.
                 .fallbackToDestructiveMigrationFrom(dropAllTables = true, 1)
+                .addMigrations(*Migraciones.TODAS)
                 .addCallback(RestriccionesCheck.Callback)
                 .build()
         }
