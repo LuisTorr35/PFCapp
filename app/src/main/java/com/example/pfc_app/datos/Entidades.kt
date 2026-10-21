@@ -217,5 +217,6 @@ data class FilaResumenAtencion(
     @ColumnInfo(name = "observacion") val observacion: String?,
     @ColumnInfo(name = "clase") val clase: String?,
     @ColumnInfo(name = "probabilidad") val probabilidad: Double?,
-    @ColumnInfo(name = "version_modelo") val versionModelo: String?
+    @ColumnInfo(name = "version_modelo") val versionModelo: String?,
+    @ColumnInfo(name = "respaldada") val respaldada: Boolean
 )
