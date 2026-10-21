@@ -1,5 +1,6 @@
 package com.example.pfc_app.respaldo
 
+import com.example.pfc_app.Registro
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -12,10 +13,15 @@ import kotlinx.coroutines.withTimeout
 /**
  * Respaldo en Cloud Firestore (plan Spark). Room es la base principal: Firestore usa una caché
  * en memoria, sin copia de las atenciones ni cola de escrituras en el disco del teléfono.
+ * [emulador] ("host:puerto") solo lo usa la variante debug, para probar con el emulador de Firestore.
  */
-class RespaldoFirestore : RespaldoNube {
+class RespaldoFirestore(private val emulador: String? = null) : RespaldoNube {
     private val bd: FirebaseFirestore by lazy {
         FirebaseFirestore.getInstance().apply {
+            emulador?.let { e ->
+                useEmulator(e.substringBefore(':'), e.substringAfter(':').toInt())
+                Registro.w(Registro.NUBE, "Firestore apunta al emulador $e (solo debug)")
+            }
             firestoreSettings = FirebaseFirestoreSettings.Builder()
                 .setLocalCacheSettings(MemoryCacheSettings.newBuilder().build())
                 .build()

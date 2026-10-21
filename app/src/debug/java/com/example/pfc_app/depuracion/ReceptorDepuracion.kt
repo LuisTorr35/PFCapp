@@ -3,6 +3,7 @@ package com.example.pfc_app.depuracion
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Process
 import com.example.pfc_app.PfcApp
 import com.example.pfc_app.Registro
 import kotlinx.coroutines.Dispatchers
@@ -15,14 +16,19 @@ import kotlinx.coroutines.launch
  *   adb shell am broadcast -n com.example.pfc_app/.depuracion.ReceptorDepuracion -a com.example.pfc_app.ESTADO_RESPALDO
  *   adb shell am broadcast -n com.example.pfc_app/.depuracion.ReceptorDepuracion -a com.example.pfc_app.LISTAR_NUBE [--es uid <uid>]
  *
+ *   adb shell am broadcast -n com.example.pfc_app/.depuracion.ReceptorDepuracion -a com.example.pfc_app.USAR_EMULADOR [--es host 127.0.0.1:8080]
+ *
  * LISTAR_NUBE lee del servidor usuarios/{uid}/atenciones con la sesión abierta; sin uid, el de
  * la sesión. Con el uid de otra cuenta, las reglas de Firestore deben negar la lectura.
+ * USAR_EMULADOR apunta Firestore al emulador (sin host, vuelve al proyecto real) y cierra la app:
+ * la configuración se aplica al volver a abrirla.
  */
 class ReceptorDepuracion : BroadcastReceiver() {
     override fun onReceive(contexto: Context, intent: Intent) {
         val contenedor = (contexto.applicationContext as PfcApp).contenedor
         val pendiente = goAsync()
         contenedor.alcance.launch(Dispatchers.IO) {
+            var cerrarApp = false
             try {
                 val sesion = contenedor.cuenta.actual.value
                 when (intent.action) {
@@ -36,6 +42,13 @@ class ReceptorDepuracion : BroadcastReceiver() {
                             "Estado local: sesión ${sesion?.correoOculto} (uid ${sesion?.uid}), " +
                                 "instalación ${contenedor.preferencias.idInstalacion}, atenciones $filas"
                         )
+                    }
+
+                    ACCION_EMULADOR -> {
+                        val host = intent.getStringExtra("host")
+                        ConfigDepuracion.usarEmuladorFirestore(contexto, host)
+                        Registro.w(Registro.NUBE, "Firestore: ${host?.let { "emulador $it" } ?: "proyecto real"} desde el próximo inicio")
+                        cerrarApp = true
                     }
 
                     ACCION_LISTAR -> {
@@ -56,6 +69,7 @@ class ReceptorDepuracion : BroadcastReceiver() {
                 Registro.e(Registro.NUBE, "Orden de depuración fallida", e)
             } finally {
                 pendiente.finish()
+                if (cerrarApp) Process.killProcess(Process.myPid())
             }
         }
     }
@@ -68,5 +82,6 @@ class ReceptorDepuracion : BroadcastReceiver() {
         const val CONSULTA_ESTADO = "SELECT id_atencion, respaldada, respaldada_en, uid_respaldo FROM atencion ORDER BY id_atencion"
         const val ACCION_ESTADO = "com.example.pfc_app.ESTADO_RESPALDO"
         const val ACCION_LISTAR = "com.example.pfc_app.LISTAR_NUBE"
+        const val ACCION_EMULADOR = "com.example.pfc_app.USAR_EMULADOR"
     }
 }

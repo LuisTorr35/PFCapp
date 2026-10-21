@@ -15,6 +15,7 @@ import com.example.pfc_app.datos.BaseDatosLocal
 import com.example.pfc_app.datos.PreferenciasApp
 import com.example.pfc_app.datos.RepositorioAtenciones
 import com.example.pfc_app.datos.RepositorioVehiculos
+import com.example.pfc_app.depuracion.ConfigDepuracion
 import com.example.pfc_app.inferencia.CargadorModelo
 import com.example.pfc_app.inferencia.ModeloClasificacion
 import com.example.pfc_app.inferencia.MotorInferencia
@@ -75,7 +76,7 @@ class AppContenedor(contexto: Context) {
     val cuenta: ServicioCuenta get() = proveedorCuenta()
 
     /** Respaldo en Cloud Firestore; Firebase se inicia la primera vez que se pide. */
-    private val nubeFirestore: RespaldoNube by lazy { RespaldoFirestore() }
+    private val nubeFirestore: RespaldoNube by lazy { RespaldoFirestore(ConfigDepuracion.emuladorFirestore(this.contexto)) }
     val nube: RespaldoNube get() = proveedorNube()
 
     /** Modelo ONNX y su contrato, leídos de assets/modelo la primera vez que se piden. */

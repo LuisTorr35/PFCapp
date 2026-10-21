@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo en debug: el emulador de Firestore de la PC atiende por HTTP sin cifrar en
+     127.0.0.1 (adb reverse tcp:8080 tcp:8080). El resto del tráfico sigue cifrado. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>
