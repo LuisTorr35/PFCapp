@@ -7,6 +7,9 @@ build/
 .kotlin/
 captures/
 local.properties
+
+# Configuración del proyecto de Firebase: cada quien descarga la suya (ver README)
+google-services.json
 *.iml
 .DS_Store
 *.log
