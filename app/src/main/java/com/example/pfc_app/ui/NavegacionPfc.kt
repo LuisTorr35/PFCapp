@@ -2,6 +2,10 @@ package com.example.pfc_app.ui
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -11,8 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.pfc_app.Registro
 
-/** Rutas de las cuatro pantallas (figura de navegación del Capítulo 6). */
+/** Rutas de las cuatro pantallas (figura de navegación del Capítulo 6) y del inicio de sesión. */
 object Rutas {
+    const val INICIO_SESION = "inicio_sesion"
     const val VEHICULOS = "vehiculos"
     const val CAPTURA = "captura/{idVehiculo}?grabacion={grabacion}&rechazo={rechazo}"
     const val DIAGNOSTICO = "diagnostico?idAtencion={idAtencion}"
@@ -31,13 +36,34 @@ object Rutas {
 }
 
 /**
- * Navegación: Vehículos → Captura ("Atender") → Diagnóstico ("Diagnosticar") → Historial
+ * Navegación: Inicio de sesión (solo sin sesión guardada) → Vehículos → Captura ("Atender") → Diagnóstico ("Diagnosticar") → Historial
  * ("Guardar atención") → Diagnóstico ("Abrir atención"); Vehículos → Historial.
  * Al guardar, la pila queda Vehículos → Historial, así que volver lleva a Vehículos.
+ * Al cerrar la sesión se vacía la pila y vuelve el inicio de sesión.
  */
 @Composable
 fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
     val contenedor = contenedorApp()
+    val cuenta by contenedor.cuenta.actual.collectAsStateWithLifecycle()
+    // La sesión guardada se lee sin red: con sesión, la app abre directo en Vehículos.
+    val inicio = remember { if (contenedor.cuenta.actual.value == null) Rutas.INICIO_SESION else Rutas.VEHICULOS }
+
+    LaunchedEffect(cuenta == null) {
+        val ruta = navController.currentDestination?.route
+        if (cuenta == null && ruta != null && ruta != Rutas.INICIO_SESION) {
+            Registro.i(Registro.UI, "Sin sesión → Inicio de sesión")
+            navController.navigate(Rutas.INICIO_SESION) {
+                popUpTo(navController.graph.id) { inclusive = true }
+                launchSingleTop = true
+            }
+        } else if (cuenta != null && ruta == Rutas.INICIO_SESION) {
+            Registro.i(Registro.UI, "Sesión iniciada → Vehículos")
+            navController.navigate(Rutas.VEHICULOS) {
+                popUpTo(Rutas.INICIO_SESION) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
 
     fun volver() {
         if (!navController.popBackStack()) Registro.d(Registro.UI, "No hay pantalla anterior")
@@ -52,7 +78,12 @@ fun NavegacionPfc(navController: NavHostController = rememberNavController()) {
         }
     }
 
-    NavHost(navController = navController, startDestination = Rutas.VEHICULOS) {
+    NavHost(navController = navController, startDestination = inicio) {
+        composable(Rutas.INICIO_SESION) {
+            val vm: InicioSesionViewModel = viewModel(factory = fabricaDe { InicioSesionViewModel(contenedor) })
+            PantallaInicioSesion(vm)
+        }
+
         composable(Rutas.VEHICULOS) {
             val vm: VehiculoViewModel = viewModel(factory = fabricaDe { VehiculoViewModel(contenedor) })
             PantallaVehiculo(

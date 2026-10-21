@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
+    // Lee app/google-services.json (fuera del repositorio, ver README).
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -83,6 +85,18 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
+    constraints {
+        // Las pruebas instrumentadas usan las versiones de la app: room-testing lee los esquemas con 1.8.
+        implementation(libs.kotlinx.serialization.core)
+    }
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     // Las pruebas de JVM corren el mismo .onnx con ONNX Runtime de escritorio
@@ -95,6 +109,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.work.testing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

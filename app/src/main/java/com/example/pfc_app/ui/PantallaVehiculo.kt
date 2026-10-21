@@ -173,7 +173,7 @@ fun PantallaVehiculo(
     }
 
     Column(Modifier.fillMaxSize()) {
-        BarraSuperior("Vehículos")
+        BarraSuperior("Vehículos") { MenuCuenta(estado.cuenta, vm::pedirCerrarSesion) }
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag(EtiquetasPrueba.LISTA_VEHICULOS),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
@@ -274,6 +274,10 @@ fun PantallaVehiculo(
             },
             confirmButton = { TextButton(onClick = vm::cerrarSelectorAdaptador) { Text("Cerrar") } }
         )
+    }
+
+    estado.avisoCerrarSesion?.let { pendientes ->
+        DialogoCerrarSesion(pendientes, alConfirmar = vm::cerrarSesion, alCancelar = vm::cancelarCerrarSesion)
     }
 
     estado.error?.let { mensaje ->

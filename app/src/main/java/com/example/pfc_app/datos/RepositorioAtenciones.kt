@@ -14,6 +14,8 @@ import com.example.pfc_app.modelos.ResultadoDictamen
 import com.example.pfc_app.modelos.TipoDTC
 import com.example.pfc_app.modelos.TipoRegimen
 import kotlin.math.roundToLong
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /** Una fila del historial (CU-06): fecha, dictamen y resultado del modelo, si lo hay. */
 data class ResumenAtencion(
@@ -23,7 +25,9 @@ data class ResumenAtencion(
     val observacion: String,
     val clase: String?,
     val probabilidad: Double?,
-    val versionModelo: String?
+    val versionModelo: String?,
+    /** true si la atención ya está respaldada en la nube; false si está pendiente. */
+    val respaldada: Boolean = false
 ) {
     val tieneDiagnostico: Boolean get() = clase != null
 }
@@ -38,9 +42,10 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
     /**
      * Guarda la atención con todas sus filas en una sola transacción: si algo falla, no
      * queda nada a medias. Las atenciones rechazadas no se guardan. Sin [diagnostico]
-     * (regla 8, CU-05 E1) no se escribe fila en diagnostico.
+     * (regla 8, CU-05 E1) no se escribe fila en diagnostico. [uidRespaldo] es la cuenta con
+     * sesión abierta al guardar: solo a su nube se subirá la atención.
      */
-    fun guardar(atencion: Atencion, dictamen: Dictamen, diagnostico: Diagnostico?): Long {
+    fun guardar(atencion: Atencion, dictamen: Dictamen, diagnostico: Diagnostico?, uidRespaldo: String? = null): Long {
         require(dictamen.permiteGuardar()) { "Las atenciones rechazadas no se guardan" }
         require(atencion.regimenes.isNotEmpty()) { "La atención no tiene regímenes capturados" }
         try {
@@ -49,7 +54,8 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
                     EntidadAtencion(
                         idVehiculo = atencion.idVehiculo,
                         fecha = FechasIso.normalizar(atencion.fecha),
-                        baroKpa = atencion.barometricaSesion
+                        baroKpa = atencion.barometricaSesion,
+                        uidRespaldo = uidRespaldo
                     )
                 )
                 for (tipo in TipoRegimen.entries) {
@@ -101,8 +107,32 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
             observacion = f.observacion.orEmpty(),
             clase = f.clase,
             probabilidad = f.probabilidad,
-            versionModelo = f.versionModelo
+            versionModelo = f.versionModelo,
+            respaldada = f.respaldada
         )
+    }
+
+    // Respaldo en la nube (versión 3). La base es del teléfono: cada atención recuerda la
+    // cuenta con que se guardó y solo se sube a la nube de esa cuenta.
+
+    fun pendientesDeRespaldo(uid: String): List<Long> = dao.pendientesDeRespaldo(uid)
+
+    fun contarPendientes(uid: String): Int = dao.contarPendientes(uid)
+
+    fun contarPendientesDeOtrasCuentas(uid: String): Int = dao.contarPendientesDeOtrasCuentas(uid)
+
+    fun marcarRespaldada(idAtencion: Long, fecha: String = FechasIso.ahora()) {
+        dao.marcarRespaldada(idAtencion, fecha)
+        Registro.i(Registro.DATOS, "Atención $idAtencion marcada como respaldada ($fecha)")
+    }
+
+    /** id_atencion → respaldada, de las atenciones del vehículo; se emite de nuevo con cada cambio. */
+    fun observarRespaldo(idVehiculo: Long): Flow<Map<Long, Boolean>> =
+        dao.observarRespaldo(idVehiculo).map { filas -> filas.associate { it.idAtencion to it.respaldada } }
+
+    /** Las atenciones de antes de la versión 3 pasan a la primera cuenta que inicia sesión. */
+    fun asignarSinCuenta(uid: String): Int = dao.asignarSinCuenta(uid).also { n ->
+        if (n > 0) Registro.i(Registro.DATOS, "$n atenciones sin cuenta asignadas a la sesión actual")
     }
 
     /** La atención con sus regímenes, lecturas, códigos, contadores, dictamen y diagnóstico. */

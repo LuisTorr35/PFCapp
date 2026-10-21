@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Reglas de Cloud Firestore de PFCapp. Cada atención respaldada es un documento en
+// usuarios/{uid}/atenciones/{idDocumento}. Cada cuenta solo lee y escribe bajo su propio uid;
+// todo lo demás queda negado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid}/{documento=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

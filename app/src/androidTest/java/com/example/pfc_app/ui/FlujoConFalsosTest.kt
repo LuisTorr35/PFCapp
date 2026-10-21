@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -49,8 +50,10 @@ class FlujoConFalsosTest {
         c.diagnosticarAtencion = { a -> Falsos.diagnosticar(a) }
     }
 
+    private val regla = ReglaBaseLimpia(true, configurar = ::instalarFalsos)
+
     @get:Rule
-    val reglas: RuleChain = RuleChain.outerRule(ReglaBaseLimpia(true, ::instalarFalsos)).around(compose)
+    val reglas: RuleChain = RuleChain.outerRule(regla).around(compose)
 
     /** El servicio se crea al abrir la Captura; su R2 sale corto según la casilla. */
     private fun usarServicio(c: AppContenedor, r2Corto: Boolean) {
@@ -116,6 +119,16 @@ class FlujoConFalsosTest {
         assertEquals(46, guardada.atencion.regimen(TipoRegimen.R2)!!.lecturas.size)
         assertEquals("C1", guardada.diagnostico!!.clase)
         assertEquals(1, guardada.diagnostico!!.parametrosDesviados.size)
+
+        // Se guardó con la cuenta de la sesión y se programó el respaldo; el historial la marca pendiente.
+        assertEquals(listOf(resumen.idAtencion), contenedor.repositorioAtenciones.pendientesDeRespaldo(CuentaFalsa.CUENTA_A.uid))
+        assertTrue(regla.respaldosProgramados > 0)
+        // La fila fusiona sus textos: la marca se busca en ella.
+        compose.onAllNodesWithTag(E.FILA_ATENCION)[0].assertTextContains("Pendiente de respaldo")
+        compose.onAllNodesWithTag(E.MARCA_RESPALDO, useUnmergedTree = true)[0].assertTextEquals("Pendiente de respaldo")
+        // Cuando el trabajo de respaldo la sube, la marca cambia sola, sin volver a abrir la pantalla.
+        contenedor.repositorioAtenciones.marcarRespaldada(resumen.idAtencion)
+        pasos.esperar(10_000, "marca de respaldada") { pasos.existe(hasTestTag(E.FILA_ATENCION) and hasText("✓ Respaldada")) }
     }
 
     @Test

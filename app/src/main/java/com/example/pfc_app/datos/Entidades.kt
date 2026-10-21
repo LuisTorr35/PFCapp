@@ -40,7 +40,13 @@ data class EntidadAtencion(
     @ColumnInfo(name = "id_vehiculo") val idVehiculo: Long,
     /** ISO 8601 local (FechasIso). */
     @ColumnInfo(name = "fecha") val fecha: String,
-    @ColumnInfo(name = "baro_kpa") val baroKpa: Double?
+    @ColumnInfo(name = "baro_kpa") val baroKpa: Double?,
+    /** Versión 3: true cuando la atención ya se subió a la nube de la cuenta [uidRespaldo]. */
+    @ColumnInfo(name = "respaldada", defaultValue = "0") val respaldada: Boolean = false,
+    /** Fecha y hora ISO 8601 del respaldo, o NULL si está pendiente. */
+    @ColumnInfo(name = "respaldada_en") val respaldadaEn: String? = null,
+    /** uid de Firebase de la cuenta con que se guardó; NULL en las anteriores a la versión 3. */
+    @ColumnInfo(name = "uid_respaldo") val uidRespaldo: String? = null
 )
 
 @Entity(
@@ -211,5 +217,12 @@ data class FilaResumenAtencion(
     @ColumnInfo(name = "observacion") val observacion: String?,
     @ColumnInfo(name = "clase") val clase: String?,
     @ColumnInfo(name = "probabilidad") val probabilidad: Double?,
-    @ColumnInfo(name = "version_modelo") val versionModelo: String?
+    @ColumnInfo(name = "version_modelo") val versionModelo: String?,
+    @ColumnInfo(name = "respaldada") val respaldada: Boolean
+)
+
+/** Estado de respaldo de una atención, para actualizar la marca del historial. */
+data class FilaEstadoRespaldo(
+    @ColumnInfo(name = "id_atencion") val idAtencion: Long,
+    @ColumnInfo(name = "respaldada") val respaldada: Boolean
 )

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -86,6 +87,12 @@ fun PantallaHistorial(vm: HistorialViewModel, aviso: String?, alVolver: () -> Un
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(f.fecha, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                             TextoTarjeta(f.resultado)
+                            Text(
+                                if (f.respaldada) "✓ Respaldada" else "Pendiente de respaldo",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.testTag(EtiquetasPrueba.MARCA_RESPALDO)
+                            )
                         }
                         Text("›", fontSize = 28.sp)
                     }

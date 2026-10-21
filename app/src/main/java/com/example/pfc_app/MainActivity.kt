@@ -18,6 +18,8 @@ import com.example.pfc_app.ui.theme.PFCappTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Con sesión guardada, se encola el respaldo de las atenciones pendientes de la cuenta.
+        if (savedInstanceState == null) (application as PfcApp).contenedor.alIniciarSesion()
         enableEdgeToEdge()
         setContent {
             PFCappTheme {

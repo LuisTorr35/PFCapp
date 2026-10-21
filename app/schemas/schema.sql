@@ -1,14 +1,14 @@
--- Esquema de la base local pfc_app.db, versión 2.
--- Generado por herramientas/esquema_desde_room.py a partir de app/schemas/com.example.pfc_app.datos.BaseDatosLocal/2.json,
+-- Esquema de la base local pfc_app.db, versión 3.
+-- Generado por herramientas/esquema_desde_room.py a partir de app/schemas/com.example.pfc_app.datos.BaseDatosLocal/3.json,
 -- que exporta Room (exportSchema = true). No editar a mano: volver a generarlo.
--- identityHash de Room: a7b5f162244f78b2141be9d9828d9dd7
+-- identityHash de Room: 813fcc93c481b4e48472375115e538e0
 -- Además, Room crea room_master_table y SQLite crea sqlite_sequence (AUTOINCREMENT).
 
 -- Tablas (9)
 
 CREATE TABLE IF NOT EXISTS `vehiculo` (`id_vehiculo` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `codigo` TEXT NOT NULL, `marca` TEXT NOT NULL, `modelo` TEXT NOT NULL, `anio` INTEGER NOT NULL, `cilindros` INTEGER NOT NULL, `familia_gestion` TEXT);
 
-CREATE TABLE IF NOT EXISTS `atencion` (`id_atencion` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_vehiculo` INTEGER NOT NULL, `fecha` TEXT NOT NULL, `baro_kpa` REAL, FOREIGN KEY(`id_vehiculo`) REFERENCES `vehiculo`(`id_vehiculo`) ON UPDATE NO ACTION ON DELETE NO ACTION );
+CREATE TABLE IF NOT EXISTS `atencion` (`id_atencion` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_vehiculo` INTEGER NOT NULL, `fecha` TEXT NOT NULL, `baro_kpa` REAL, `respaldada` INTEGER NOT NULL DEFAULT 0, `respaldada_en` TEXT, `uid_respaldo` TEXT, FOREIGN KEY(`id_vehiculo`) REFERENCES `vehiculo`(`id_vehiculo`) ON UPDATE NO ACTION ON DELETE NO ACTION );
 
 CREATE TABLE IF NOT EXISTS `regimen` (`id_regimen` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_atencion` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `muestras_utiles` INTEGER NOT NULL DEFAULT 0, `descartadas_transitorio` INTEGER NOT NULL DEFAULT 0, `descartadas_techo` INTEGER NOT NULL DEFAULT 0, `frecuencia_hz` REAL, FOREIGN KEY(`id_atencion`) REFERENCES `atencion`(`id_atencion`) ON UPDATE NO ACTION ON DELETE CASCADE );
 

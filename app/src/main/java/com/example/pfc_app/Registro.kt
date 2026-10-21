@@ -15,6 +15,9 @@ object Registro {
     const val DATOS = "PFC.Datos"
     const val UI = "PFC.UI"
 
+    /** Inicio de sesión con Google y respaldo de las atenciones en Firestore. */
+    const val NUBE = "PFC.Nube"
+
     fun d(etiqueta: String, mensaje: String) {
         Log.d(etiqueta, mensaje)
     }
