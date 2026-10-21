@@ -17,6 +17,8 @@ orgJson = "20251224"
 testRunner = "1.6.2"
 room = "2.8.5"
 ksp = "2.2.10-2.0.2"
+# La de room-testing; sin esto la app fija la 1.7.3 de navigation y las pruebas de migración fallan.
+kotlinxSerialization = "1.8.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +47,8 @@ org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

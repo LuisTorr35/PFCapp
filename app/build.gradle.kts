@@ -83,6 +83,10 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    constraints {
+        // Las pruebas instrumentadas usan las versiones de la app: room-testing lee los esquemas con 1.8.
+        implementation(libs.kotlinx.serialization.core)
+    }
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     // Las pruebas de JVM corren el mismo .onnx con ONNX Runtime de escritorio
@@ -95,6 +99,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

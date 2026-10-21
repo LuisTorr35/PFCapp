@@ -58,7 +58,8 @@ interface DaoAtenciones {
     /** Historial del vehículo, de la atención más reciente a la más antigua. */
     @Query(
         """
-        SELECT a.id_atencion, a.fecha, d.resultado, d.observacion, g.clase, g.probabilidad, g.version_modelo
+        SELECT a.id_atencion, a.fecha, d.resultado, d.observacion, g.clase, g.probabilidad, g.version_modelo,
+            a.respaldada
         FROM atencion a
         JOIN dictamen d ON d.id_atencion = a.id_atencion
         LEFT JOIN diagnostico g ON g.id_atencion = a.id_atencion
@@ -91,4 +92,24 @@ interface DaoAtenciones {
 
     @Query("SELECT * FROM parametro_desviado WHERE id_diagnostico = :idDiagnostico ORDER BY id_parametro")
     fun parametros(idDiagnostico: Long): List<EntidadParametroDesviado>
+
+    // Respaldo en la nube (versión 3).
+
+    /** Atenciones de la cuenta [uid] que todavía no se subieron, de la más antigua a la más reciente. */
+    @Query("SELECT id_atencion FROM atencion WHERE respaldada = 0 AND uid_respaldo = :uid ORDER BY id_atencion")
+    fun pendientesDeRespaldo(uid: String): List<Long>
+
+    @Query("SELECT count(*) FROM atencion WHERE respaldada = 0 AND uid_respaldo = :uid")
+    fun contarPendientes(uid: String): Int
+
+    /** Pendientes de otras cuentas: se quedan en el teléfono hasta que esa cuenta vuelva a entrar. */
+    @Query("SELECT count(*) FROM atencion WHERE respaldada = 0 AND uid_respaldo IS NOT NULL AND uid_respaldo != :uid")
+    fun contarPendientesDeOtrasCuentas(uid: String): Int
+
+    @Query("UPDATE atencion SET respaldada = 1, respaldada_en = :fecha WHERE id_atencion = :idAtencion")
+    fun marcarRespaldada(idAtencion: Long, fecha: String): Int
+
+    /** Asigna a [uid] las atenciones guardadas antes de la versión 3, que no tienen cuenta. */
+    @Query("UPDATE atencion SET uid_respaldo = :uid WHERE uid_respaldo IS NULL")
+    fun asignarSinCuenta(uid: String): Int
 }
