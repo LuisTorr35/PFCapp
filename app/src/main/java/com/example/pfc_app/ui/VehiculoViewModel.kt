@@ -7,6 +7,7 @@ import com.example.pfc_app.Registro
 import com.example.pfc_app.adquisicion.DispositivoBT
 import com.example.pfc_app.adquisicion.DispositivosBluetooth
 import com.example.pfc_app.adquisicion.GrabacionDemo
+import com.example.pfc_app.cuenta.Cuenta
 import com.example.pfc_app.datos.RepositorioVehiculos
 import com.example.pfc_app.modelos.Vehiculo
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +47,11 @@ data class EstadoVehiculos(
     val dispositivos: List<DispositivoBT>? = null,
     /** "Atender" en modo real sin adaptador elegido. */
     val pideAdaptador: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    /** La cuenta con sesión abierta, para el menú de la barra. */
+    val cuenta: Cuenta? = null,
+    /** Atenciones de la cuenta sin respaldar al pedir "Cerrar sesión"; null sin aviso abierto. */
+    val avisoCerrarSesion: Int? = null
 ) {
     /** Lista filtrada por la búsqueda por código (acepta "VEH-010", "010" o "10"). */
     val vehiculosFiltrados: List<Vehiculo>
@@ -62,6 +67,10 @@ data class EstadoVehiculos(
 class VehiculoViewModel(private val contenedor: AppContenedor) : ViewModel() {
     private val _estado = MutableStateFlow(EstadoVehiculos())
     val estado: StateFlow<EstadoVehiculos> = _estado.asStateFlow()
+
+    init {
+        viewModelScope.launch { contenedor.cuenta.actual.collect { c -> _estado.update { it.copy(cuenta = c) } } }
+    }
 
     /** Relee la lista y las preferencias; se llama cada vez que la pantalla aparece. */
     fun recargar() {
@@ -193,6 +202,34 @@ class VehiculoViewModel(private val contenedor: AppContenedor) : ViewModel() {
     fun mostrarError(mensaje: String) = _estado.update { it.copy(error = mensaje) }
 
     fun cerrarError() = _estado.update { it.copy(error = null) }
+
+    /** "Cerrar sesión": si la cuenta tiene atenciones sin respaldar, primero avisa. */
+    fun pedirCerrarSesion() {
+        val uid = contenedor.cuenta.actual.value?.uid ?: return
+        viewModelScope.launch {
+            intentar({ t ->
+                Registro.e(Registro.NUBE, "No se pudieron contar las atenciones sin respaldar", t)
+                _estado.update { it.copy(error = "No se pudo cerrar la sesión: ${t.mensajeLegible()}") }
+            }) {
+                val pendientes = withContext(Dispatchers.IO) { contenedor.repositorioAtenciones.contarPendientes(uid) }
+                if (pendientes > 0) {
+                    Registro.i(Registro.NUBE, "Cerrar sesión con $pendientes atenciones sin respaldar: se avisa")
+                    _estado.update { it.copy(avisoCerrarSesion = pendientes) }
+                } else {
+                    cerrarSesion()
+                }
+            }
+        }
+    }
+
+    fun cancelarCerrarSesion() = _estado.update { it.copy(avisoCerrarSesion = null) }
+
+    /** La navegación vuelve sola al inicio de sesión cuando la sesión se cierra. */
+    fun cerrarSesion() {
+        _estado.update { it.copy(avisoCerrarSesion = null) }
+        // En el alcance de la app: esta pantalla se descarta al cerrarse la sesión.
+        contenedor.alcance.launch { contenedor.cuenta.cerrarSesion() }
+    }
 
     private data class Cuarteto<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
 }
