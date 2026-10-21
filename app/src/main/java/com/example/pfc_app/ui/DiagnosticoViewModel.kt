@@ -124,7 +124,7 @@ class DiagnosticoViewModel(private val contenedor: AppContenedor, private val id
                 _estado.update { it.copy(guardando = false, error = "No se pudo guardar la atención: ${t.mensajeLegible()}") }
             }) {
                 val id = withContext(Dispatchers.IO) {
-                    contenedor.repositorioAtenciones.guardar(actual.atencion, actual.dictamen, actual.diagnostico)
+                    contenedor.guardarAtencion(actual.atencion, actual.dictamen, actual.diagnostico)
                 }
                 Registro.i(Registro.UI, "Atención $id guardada con diagnóstico ${actual.diagnostico?.clase}")
                 contenedor.sesion.limpiar()
