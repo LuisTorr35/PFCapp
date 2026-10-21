@@ -265,7 +265,7 @@ class CapturaViewModel(
                 Registro.e(Registro.UI, "No se pudo guardar la atención sin diagnóstico", t)
                 _estado.update { it.copy(fase = FaseCaptura.LISTA, aviso = "No se pudo guardar la atención: ${t.mensajeLegible()}") }
             }) {
-                val id = withContext(Dispatchers.IO) { contenedor.repositorioAtenciones.guardar(a, d, null) }
+                val id = withContext(Dispatchers.IO) { contenedor.guardarAtencion(a, d, null) }
                 Registro.i(Registro.UI, "Atención $id de ${v.codigo} guardada sin diagnóstico (CU-05 E1)")
                 contenedor.sesion.limpiar()
                 _estado.update { it.copy(fase = FaseCaptura.GUARDADA, guardadaSinDiagnostico = true) }

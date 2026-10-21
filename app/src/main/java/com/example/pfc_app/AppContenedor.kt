@@ -15,6 +15,7 @@ import com.example.pfc_app.datos.BaseDatosLocal
 import com.example.pfc_app.datos.PreferenciasApp
 import com.example.pfc_app.datos.RepositorioAtenciones
 import com.example.pfc_app.datos.RepositorioVehiculos
+import com.example.pfc_app.depuracion.ConfigDepuracion
 import com.example.pfc_app.inferencia.CargadorModelo
 import com.example.pfc_app.inferencia.ModeloClasificacion
 import com.example.pfc_app.inferencia.MotorInferencia
@@ -23,6 +24,11 @@ import com.example.pfc_app.modelos.ContratoModelo
 import com.example.pfc_app.modelos.Diagnostico
 import com.example.pfc_app.modelos.Dictamen
 import com.example.pfc_app.procesamiento.ProcesadorCaracteristicas
+import com.example.pfc_app.respaldo.AtencionesRoom
+import com.example.pfc_app.respaldo.RespaldoFirestore
+import com.example.pfc_app.respaldo.RespaldoNube
+import com.example.pfc_app.respaldo.SubidaRespaldo
+import com.example.pfc_app.respaldo.TrabajoRespaldo
 import com.example.pfc_app.validacion.ValidadorAtencion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +75,10 @@ class AppContenedor(contexto: Context) {
     private val cuentaFirebase: ServicioCuenta by lazy { ServicioCuentaFirebase(this.contexto) }
     val cuenta: ServicioCuenta get() = proveedorCuenta()
 
+    /** Respaldo en Cloud Firestore; Firebase se inicia la primera vez que se pide. */
+    private val nubeFirestore: RespaldoNube by lazy { RespaldoFirestore(ConfigDepuracion.emuladorFirestore(this.contexto)) }
+    val nube: RespaldoNube get() = proveedorNube()
+
     /** Modelo ONNX y su contrato, leídos de assets/modelo la primera vez que se piden. */
     val modelo: ModeloClasificacion by lazy {
         Registro.i(Registro.INFERENCIA, "Cargando el modelo desde assets")
@@ -102,6 +112,10 @@ class AppContenedor(contexto: Context) {
     var proveedorContrato: () -> ContratoModelo = { modelo.contrato }
     var proveedorCatalogo: () -> CatalogoDemo = { catalogoAssets }
     var proveedorCuenta: () -> ServicioCuenta = { cuentaFirebase }
+    var proveedorNube: () -> RespaldoNube = { nubeFirestore }
+
+    /** Encola el trabajo único de respaldo (TrabajoRespaldo). */
+    var programarRespaldo: () -> Unit = ::programarRespaldoReal
 
     fun restablecerFabricas() {
         fabricaServicio = ::servicioReal
@@ -111,9 +125,33 @@ class AppContenedor(contexto: Context) {
         proveedorContrato = { modelo.contrato }
         proveedorCatalogo = { catalogoAssets }
         proveedorCuenta = { cuentaFirebase }
+        proveedorNube = { nubeFirestore }
+        programarRespaldo = ::programarRespaldoReal
     }
 
-    /** Tras iniciar sesión, las atenciones guardadas antes de la versión 3 pasan a esta cuenta. */
+    private fun programarRespaldoReal() = TrabajoRespaldo.encolar(contexto)
+
+    /** La subida de las pendientes de la cuenta con sesión abierta (la corre TrabajoRespaldo). */
+    fun subidaRespaldo(): SubidaRespaldo = SubidaRespaldo(
+        atenciones = AtencionesRoom(repositorioAtenciones, repositorioVehiculos) { preferencias.idInstalacion },
+        nube = nube,
+        uidActual = { cuenta.actual.value?.uid }
+    )
+
+    /**
+     * Guarda la atención con la cuenta de la sesión (solo a su nube se subirá) y encola el
+     * respaldo, que espera a que haya red. Se llama fuera del hilo principal.
+     */
+    fun guardarAtencion(atencion: Atencion, dictamen: Dictamen, diagnostico: Diagnostico?): Long {
+        val id = repositorioAtenciones.guardar(atencion, dictamen, diagnostico, cuenta.actual.value?.uid)
+        programarRespaldo()
+        return id
+    }
+
+    /**
+     * Al abrir la app y al iniciar sesión: las atenciones guardadas antes de la versión 3 pasan a
+     * la cuenta con sesión abierta y se encola el respaldo de sus pendientes.
+     */
     fun alIniciarSesion() {
         val uid = cuenta.actual.value?.uid ?: return
         alcance.launch(Dispatchers.IO) {
@@ -122,6 +160,7 @@ class AppContenedor(contexto: Context) {
             } catch (e: Exception) {
                 Registro.e(Registro.DATOS, "No se pudieron asignar las atenciones sin cuenta", e)
             }
+            programarRespaldo()
         }
     }
 

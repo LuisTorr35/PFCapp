@@ -14,6 +14,8 @@ import com.example.pfc_app.modelos.ResultadoDictamen
 import com.example.pfc_app.modelos.TipoDTC
 import com.example.pfc_app.modelos.TipoRegimen
 import kotlin.math.roundToLong
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /** Una fila del historial (CU-06): fecha, dictamen y resultado del modelo, si lo hay. */
 data class ResumenAtencion(
@@ -123,6 +125,10 @@ class RepositorioAtenciones(private val base: BaseDatosLocal) {
         dao.marcarRespaldada(idAtencion, fecha)
         Registro.i(Registro.DATOS, "Atención $idAtencion marcada como respaldada ($fecha)")
     }
+
+    /** id_atencion → respaldada, de las atenciones del vehículo; se emite de nuevo con cada cambio. */
+    fun observarRespaldo(idVehiculo: Long): Flow<Map<Long, Boolean>> =
+        dao.observarRespaldo(idVehiculo).map { filas -> filas.associate { it.idAtencion to it.respaldada } }
 
     /** Las atenciones de antes de la versión 3 pasan a la primera cuenta que inicia sesión. */
     fun asignarSinCuenta(uid: String): Int = dao.asignarSinCuenta(uid).also { n ->

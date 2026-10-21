@@ -3,6 +3,7 @@ package com.example.pfc_app.datos
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /** Consultas de la tabla vehiculo. */
 @Dao
@@ -108,6 +109,10 @@ interface DaoAtenciones {
 
     @Query("UPDATE atencion SET respaldada = 1, respaldada_en = :fecha WHERE id_atencion = :idAtencion")
     fun marcarRespaldada(idAtencion: Long, fecha: String): Int
+
+    /** Se vuelve a emitir cada vez que cambia la tabla atencion (por ejemplo, al respaldarse una). */
+    @Query("SELECT id_atencion, respaldada FROM atencion WHERE id_vehiculo = :idVehiculo")
+    fun observarRespaldo(idVehiculo: Long): Flow<List<FilaEstadoRespaldo>>
 
     /** Asigna a [uid] las atenciones guardadas antes de la versión 3, que no tienen cuenta. */
     @Query("UPDATE atencion SET uid_respaldo = :uid WHERE uid_respaldo IS NULL")

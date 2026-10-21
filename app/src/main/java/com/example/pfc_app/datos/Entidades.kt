@@ -220,3 +220,9 @@ data class FilaResumenAtencion(
     @ColumnInfo(name = "version_modelo") val versionModelo: String?,
     @ColumnInfo(name = "respaldada") val respaldada: Boolean
 )
+
+/** Estado de respaldo de una atención, para actualizar la marca del historial. */
+data class FilaEstadoRespaldo(
+    @ColumnInfo(name = "id_atencion") val idAtencion: Long,
+    @ColumnInfo(name = "respaldada") val respaldada: Boolean
+)

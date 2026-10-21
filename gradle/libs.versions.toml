@@ -19,13 +19,14 @@ room = "2.8.5"
 ksp = "2.2.10-2.0.2"
 # La de room-testing; sin esto la app fija la 1.7.3 de navigation y las pruebas de migración fallan.
 kotlinxSerialization = "1.8.1"
-# Inicio de sesión con Google (Firebase Authentication, plan Spark)
+# Inicio de sesión con Google y respaldo en la nube (plan Spark: Authentication y Firestore)
 googleServices = "4.4.4"
 # La 35 trae firebase-auth 25 compilada con Kotlin 2.4; el compilador del proyecto (2.2) no la lee.
 firebaseBom = "34.19.0"
 credentials = "1.6.0"
 # 1.2 está compilada con Kotlin 2.4 y el compilador del proyecto (2.2) no la lee.
 googleId = "1.1.1"
+work = "2.11.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,9 +58,12 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleId" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "work" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 

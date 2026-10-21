@@ -21,7 +21,9 @@ data class FilaHistorial(
     val fecha: String,
     /** "Completa · Encendido y combustión, 72 %" o "Parcial · Sin diagnóstico" */
     val resultado: String,
-    val tieneDiagnostico: Boolean
+    val tieneDiagnostico: Boolean,
+    /** Marca discreta: respaldada en la nube o pendiente. */
+    val respaldada: Boolean = false
 )
 
 data class EstadoPantallaHistorial(
@@ -37,6 +39,17 @@ data class EstadoPantallaHistorial(
 class HistorialViewModel(private val contenedor: AppContenedor, private val idVehiculo: Long) : ViewModel() {
     private val _estado = MutableStateFlow(EstadoPantallaHistorial())
     val estado: StateFlow<EstadoPantallaHistorial> = _estado.asStateFlow()
+
+    init {
+        // La marca de respaldo cambia sola cuando el trabajo de respaldo sube una atención.
+        viewModelScope.launch {
+            intentar({ t -> Registro.w(Registro.UI, "No se pudo seguir el estado de respaldo", t) }) {
+                contenedor.repositorioAtenciones.observarRespaldo(idVehiculo).collect { respaldo ->
+                    _estado.update { e -> e.copy(filas = e.filas.map { f -> f.copy(respaldada = respaldo[f.idAtencion] ?: f.respaldada) }) }
+                }
+            }
+        }
+    }
 
     /** Se llama cada vez que la pantalla aparece. */
     fun recargar() {
@@ -72,7 +85,7 @@ class HistorialViewModel(private val contenedor: AppContenedor, private val idVe
             } else {
                 "Sin diagnóstico"
             }
-            return FilaHistorial(r.idAtencion, Formatos.fechaHora(r.fecha), "$resultado · $detalle", r.tieneDiagnostico)
+            return FilaHistorial(r.idAtencion, Formatos.fechaHora(r.fecha), "$resultado · $detalle", r.tieneDiagnostico, r.respaldada)
         }
     }
 }
