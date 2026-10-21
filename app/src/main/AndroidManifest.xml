@@ -13,6 +13,11 @@
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
+    <!-- Inicio de sesión con Google y respaldo en Firestore. La app funciona sin red; solo
+         el primer inicio de sesión y la subida de las atenciones la necesitan. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-feature
         android:name="android.hardware.bluetooth"
         android:required="false" />

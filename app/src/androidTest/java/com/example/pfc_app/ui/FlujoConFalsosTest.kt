@@ -50,7 +50,7 @@ class FlujoConFalsosTest {
     }
 
     @get:Rule
-    val reglas: RuleChain = RuleChain.outerRule(ReglaBaseLimpia(true, ::instalarFalsos)).around(compose)
+    val reglas: RuleChain = RuleChain.outerRule(ReglaBaseLimpia(true, configurar = ::instalarFalsos)).around(compose)
 
     /** El servicio se crea al abrir la Captura; su R2 sale corto según la casilla. */
     private fun usarServicio(c: AppContenedor, r2Corto: Boolean) {

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,7 +47,7 @@ val FormaBoton = RoundedCornerShape(10.dp)
 
 /** Barra superior con "←" como texto (sin íconos) y una línea inferior, como en las maquetas. */
 @Composable
-fun BarraSuperior(titulo: String, alVolver: (() -> Unit)? = null) {
+fun BarraSuperior(titulo: String, alVolver: (() -> Unit)? = null, acciones: @Composable RowScope.() -> Unit = {}) {
     Column(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 8.dp),
@@ -59,7 +60,14 @@ fun BarraSuperior(titulo: String, alVolver: (() -> Unit)? = null) {
             } else {
                 Spacer(Modifier.width(12.dp))
             }
-            Text(titulo, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                titulo,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            acciones()
         }
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
     }
